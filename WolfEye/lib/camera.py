@@ -167,6 +167,11 @@ class Camera():
 	def scan(this):
 		"""Scanned image (often from 'binary')"""
 		return this._SCAN
+	
+	# Reset de l'isolement
+	def resetBin(this):
+		"""Reset the binary image"""
+		this._BINARY = Empty()
 		
 	# ------------------------------------------------------- #
 	
@@ -306,7 +311,7 @@ class Camera():
 				if this._KERNEL is not None: # On applique un flou uniquement pour lisser le bruit
 					this._FRAME = cv2.filter2D(frame, -1, this._KERNEL)
 				else: this._FRAME = frame
-				break
+				break #bye
 			# On a pas eu d'image...
 			else: error -= 1
 		return ret
@@ -318,17 +323,17 @@ class Camera():
 		 - count: number of frame to take
 		"""
 		
-		# this._REF
-		
 		# Arguments
-		seuil = kargs.get('seuil', 150)
-		count = kargs.get('count', 1)
+		sumSeuil = kargs.get('sumSeuil', 200)
+		refSeuil = kargs.get('refSeuil', 150)
 		interval = kargs.get('interval', 0)
+		count = kargs.get('count', 1)
 		
 		# Image cumulative
 		cumul = None
 		
 		# Capture image par image
+		if count > 1: print 'Prise de reference sur %d prises...' % count
 		for i in xrange(count):
 			if i and interval: time.sleep(interval/1000)
 			
@@ -336,19 +341,27 @@ class Camera():
 			this.getFrame()
 			
 			# Référence actuelle
-			ref = this._FRAME.copy()
+			current = this._FRAME
 			
-			if i:
-				if this.detectByRef(seuil=seuil, ref=result, frame=ref).sum() > 100:
-					raise Exception("Don't interfere with the reference !")
-				cumul += ref
+			if i: # Si ce n'est plus la première itération
+			
+				# Détection d'un changement
+				this.detectByRef(seuil=refSeuil, ref=result, frame=current)
+				sum = this.binary.sum()/255
+				if sum > sumSeuil: # Crash
+					raise Exception("Don't interfere with the reference ! (%d)" % sum)
+				
+				# Cumulation
+				cumul += current
+			
 			else: # Première itération
-				cumul = ref
+				cumul = current.astype(int)
 				
 			# Calcul de l'image moyenne actuelle
 			result = (cumul / (i+1)).astype(np.uint8)
 		###
 		
+		this.resetBin()
 		this._REF = result
 		return result
 	

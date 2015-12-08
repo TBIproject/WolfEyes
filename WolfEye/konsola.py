@@ -1,3 +1,9 @@
+"""
+Tentative d'interface en console basé sur un système similaire aux winforms...
+Juste pour tuer le temps.
+C'est moche.
+Berk.
+"""
 import shutil
 import os
 

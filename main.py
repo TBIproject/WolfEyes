@@ -25,6 +25,9 @@ while 1:
 	# Isolement
 	r = cam.detectByRef(seuil=150)
 	
+	# Colonnage
+	# cam.saber()
+	
 	# Détection
 	cam.skywalker(offshore=3, minSize=10)
 	
@@ -33,6 +36,7 @@ while 1:
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)
+	cv2.imshow('reference', cam.reference)
 	for name, img in r.iteritems(): cv2.imshow('src1%s'%name, img)
 	cv2.imshow('scan', cam.scan)
 	
@@ -42,7 +46,7 @@ while 1:
 		break # On quitte
 		
 	elif sKey == ord(' '):
-		cam.setReference()
+		cam.setReference(count=10)
 ### END WHILE
 
 # On ferme tout
