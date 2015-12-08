@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+from WolfEye.lib.camera import *
+import numpy as np
+import time
+import cv2
+
+width, height = (1280, 720)
+
+# Création de la caméra
+cam = Camera()
+cam.init(0, width=1280, height=720, exposure=-5)
+cam.setFOV(horizontal=math.radians(92.0))
+cam.setImageVertBand(0.45, 0.5)
+
+def bouger_souris(x, y):
+	# TODO
+	print (x, y)
+###
+
+print 'looping...'
+while 1:
+	# On filme
+	cam.getFrame()
+	
+	# Isolement
+	r = cam.detectByRef(seuil=150)
+	
+	# Détection
+	cam.skywalker(offshore=3, minSize=10)
+	
+	# On bouge la souris si le doigt est détecté
+	if cam.finger: bouger_souris(cam.finger.x, 0)
+	
+	# Affichage
+	cv2.imshow('source', cam.frame)
+	for name, img in r.iteritems(): cv2.imshow('src1%s'%name, img)
+	cv2.imshow('scan', cam.scan)
+	
+	# Input management
+	sKey = Camera.waitKey()
+	if sKey == ord('q'):
+		break # On quitte
+		
+	elif sKey == ord(' '):
+		cam.setReference()
+### END WHILE
+
+# On ferme tout
+Camera.closeCamApp()
