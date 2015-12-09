@@ -1,4 +1,5 @@
-from WolfEye.lib.camera import *
+from WolfEyes.lib.camera import *
+import WolfEye.MouseControl as mouse
 import math
 import time
 import cv2
@@ -13,36 +14,32 @@ cam2.setBlurSize(3)
 
 cam1.setImageVertBand(0.45, 0.5)
 cam2.setImageVertBand(0.45, 0.5)
-# test.setBlurSize(3)
 cam1.setFOV(horizontal=math.radians(92.0))
 cam2.setFOV(horizontal=math.radians(92.0))
 
-a, b = 17, 240
+REF_COUNT = 8
+
+CONTROL = False
 
 while 1:
 	cam1.getFrame()
 	cam2.getFrame()
 	
-	# r = cam1.detectByColor(hueLowMax=a, hueHighMin=b, blur=True)
-	# cam2.detectByColor(hueLowMax=a, hueHighMin=b, blur=True)
-	
 	r = cam1.detectByRef(seuil=150)
 	cam2.detectByRef(seuil=150)
-	
-	# r = cam1.detectHybrid()
-	# cam2.detectHybrid()
 	
 	cam1.skywalker(offshore=5, minSize=15)
 	cam2.skywalker(offshore=5, minSize=15)
 	
-	finger = cam1 % cam2
-	# if finger: print finger
+	click, finger = cam1 % cam2
+	if finger: print finger
+	if click: mouse.click(*finger.pos, click)
 	
 	cv2.imshow('cam1', cam1.frame)
 	cv2.imshow('cam1s', cam1.scan)
 	cv2.imshow('cam2', cam2.frame)
 	cv2.imshow('cam2s', cam2.scan)
-	for k, v in r.iteritems(): cv2.imshow(k, v)
+	# for k, v in r.iteritems(): cv2.imshow(k, v)
 	
 	# Input management
 	sKey = Camera.waitKey()
@@ -55,14 +52,19 @@ while 1:
 		cam2.calibrate(True)
 		print
 	
+	elif sKey == ord('c'):
+		print
+		CONTROL = not CONTROL
+		print 'CONTROL is %s' % CONTROL
+		print
+	
 	elif sKey == ord('r'):
-		cam1.setReference()
-		cam2.setReference()
+		cam1.setReference(count=REF_COUNT)
+		cam2.setReference(count=REF_COUNT)
 	
 	elif sKey == ord('a'):
 		print
-		print math.degrees(cam1.fingerAbsoluteAngle)
-		# print cam2.fingerAbsoluteAngle
+		print (math.degrees(cam1.fingerAbsoluteAngle), math.degrees(cam2.fingerAbsoluteAngle))
 		print
 		
 	elif sKey == ord('o'):

@@ -302,6 +302,8 @@ class Camera():
 	def getFrame(this, error=3):
 		"""Frame retreiving and formatting"""
 		this.checkInit()
+		
+		# """
 		while error>=0:
 			ret, frame = this._CAP.read()
 			if ret:
@@ -315,7 +317,18 @@ class Camera():
 			# On a pas eu d'image...
 			else: error -= 1
 		return ret
-	
+		"""
+		ret, frame = this._CAP.read()
+		if ret:
+			a = this._BAND.x * height(frame)
+			b = this._BAND.y * height(frame)
+			frame = frame[a:b:this._RES,:,:]
+			if this._KERNEL is not None: # On applique un flou uniquement pour lisser le bruit
+				this._FRAME = cv2.filter2D(frame, -1, this._KERNEL)
+			else: this._FRAME = frame
+		return ret
+		"""#"""
+		
 	# On stocke l'image de référence
 	def setReference(this, **kargs):
 		"""Save frame as reference
@@ -434,13 +447,17 @@ class Camera():
 	
 	# Pour déduire la position d'un doigt entre deux caméras
 	def fingerPosition(this, cam):
-		"""Return's finger position depending on the two camera's data"""
+		"""Return's finger position depending on the two camera's data
+			Return values:
+			 - click (bool)
+			 - position (D2Point)
+		"""
 		
 		# 'cam' doit être de type 'Camera'
 		if not isinstance(cam, Camera): raise Exception("Operation uniquement possible sur un objet de type 'Camera'...")
 		
 		# Tout doit être calibré et detecté, sinon on peut pas
-		if not (this.finger and cam.finger and this.position and cam.position): return None
+		if not (this.finger and cam.finger and this.position and cam.position): return (False, None)
 		
 		try: # Ca peut foirer
 			a = math.tan(this.fingerAbsoluteAngle)
@@ -453,8 +470,13 @@ class Camera():
 			y = a * x + b
 		
 		# Catch !
-		except: return None
-		return D2Point(x, y)
+		except: return (False, None)
+		
+		# Si les doigts sont détectés à la position minimale
+		click = (this.finger.y == 0 and cam.finger.y == 0)
+		
+		# Si ya click
+		return (click, D2Point(x, y))
 		
 	# Simplification (cam1 % cam2)
 	def __mod__(this, cam): return this.fingerPosition(cam)

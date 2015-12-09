@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from WolfEye.lib.camera import *
+from WolfEyes.lib.camera import *
 import numpy as np
 import time
 import cv2
@@ -37,7 +37,7 @@ while 1:
 	# Affichage
 	cv2.imshow('source', cam.frame)
 	cv2.imshow('reference', cam.reference)
-	for name, img in r.iteritems(): cv2.imshow('src1%s'%name, img)
+	# for name, img in r.iteritems(): cv2.imshow('src1%s'%name, img)
 	cv2.imshow('scan', cam.scan)
 	
 	# Input management

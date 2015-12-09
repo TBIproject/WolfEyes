@@ -47,6 +47,9 @@ class D2Point():
 	@length.setter
 	def length(this, val): return this % val
 	
+	@property
+	def pos(this): return (this.x, this.y)
+	
 	# Vecteur unitaire (~D2Point)
 	def __invert__(this):
 		size = abs(this)
