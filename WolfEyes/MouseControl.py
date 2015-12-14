@@ -30,7 +30,7 @@ def move(x, y):
 	PYMOUSE.move(x, y)
 ###
 
-def drag(x, y, click):
+def drag(click, x, y):
 	if DRAG: # Si on est en train de glisser
 		
 		# Si on clique toujours

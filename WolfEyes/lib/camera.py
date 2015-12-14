@@ -84,7 +84,7 @@ class Camera():
 		this._FRAME = Empty()
 		
 		# Image binaire rendue par les détections
-		this._BINARY = Empty()
+		this._BINARY = Empty(channels=1)
 		
 		# Dernière image de scan calculée
 		this._SCAN = Empty()
@@ -171,7 +171,7 @@ class Camera():
 	# Reset de l'isolement
 	def resetBin(this):
 		"""Reset the binary image"""
-		this._BINARY = Empty()
+		this._BINARY = Empty(channels=1)
 		
 	# ------------------------------------------------------- #
 	
@@ -346,7 +346,7 @@ class Camera():
 		cumul = None
 		
 		# Capture image par image
-		if count > 1: print 'Prise de reference sur %d prises...' % count
+		if count > 1: printf('Prise de reference sur %d prises... ' % count)
 		for i in xrange(count):
 			if i and interval: time.sleep(interval/1000)
 			
@@ -376,6 +376,7 @@ class Camera():
 		
 		this.resetBin()
 		this._REF = result
+		if count > 1: print 'ok'
 		return result
 	
 	# On récupère la position détectée puis RàZ
@@ -481,100 +482,8 @@ class Camera():
 	# Simplification (cam1 % cam2)
 	def __mod__(this, cam): return this.fingerPosition(cam)
 	
-	# Magnifique idée de Maxou, pas compliqué en plus !
-	# Saber: On additionne toutes les colonnes de 'binary'
-	# Et on threshold !
-	def saber(this, **kargs):
-		"""Vertical object detection:
-		Slice vertically and mesures height
-		 - threshold: (the minimum height of an object
-			x =< 1: Relative to image height
-			x > 1: Pixels
-		"""
-		
-		# Arguments
-		bin = kargs.get('bin', this._BINARY)
-		thresh = kargs.get('thresh', 0.5) # Seuillage hauteur
-		thresh = tresh if thresh > 1 else thresh * height(bin)
-		
-		# Somme verticale et seuillage
-		vsum = (bin!=0).sum(axis=0) >= thresh
-		
-		# Envoi du résultat dans la pipeline
-		bin[:,:] = vsum * 255
-		#this._BINARY = vsum
+	# ------------------------------------------------------- #
 	
-	# Pour localiser le doigt sur une image binaire (noir/blanc)
-	# Skywalker: On compte le nombre de pixels sur une ligne en
-	# autorisant d'avancer dans le vide sur une distance donnée
-	def skywalker(this, **kargs):
-		"""Object detection in binary image by straight cut
-		Allow cutting for a bit through void:
-		 - offshore: distance allowed in the void to look
-		 - minSize: (the minimum size of an object)
-			x < 1: Relative to image width
-			x > 1: Pixels
-		 - bin: binary image to parse (3 channel matrix)
-		 - blur: add blur on 'bin' ? (bool)
-		"""
-		
-		# Arguments
-		bin = kargs.get('bin', this._BINARY)
-		offshore = kargs.get('offshore', 5)
-		minSize = kargs.get('minSize', 3)
-		blur = kargs.get('blur', False)
-		
-		if blur: # Flou de test
-			kernel = np.ones((3, 3), np.float32)/9
-			bin = cv2.filter2D(bin, -1, kernel)
-		
-		# On duplique l'image pour le rendu final
-		this._SCAN = scan = bin.copy()
-		
-		step = 0 # Compteur de pas dans le vide
-		start, end = None, None
-		
-		# Dimensions de l'image à scanner
-		size = D2Point(width(bin), height(bin))
-		ratio = size if minSize < 1 else 1
-		
-		# Scan pixel par pixel, en partant du bas
-		for v in xrange(int(size.y)-1, -1, -1):
-			for u in xrange(int(size.x)):
-			
-				if bin.item((v, u, 0)): # Si un pixel != 0:
-					scan[v,u] = [0, 0, 255] # Rouge.
-					step = 0 # On reset le jump
-					
-					# Si c'est le premier
-					if not start:
-						start = D2Point(u, v)
-						end = D2Point(u, v)
-					else: # On trace
-						end.x, end.y = u, v
-				
-				elif end:
-					if step < offshore:
-						scan[v,u] = [0, 255, 255] # Jaune
-						step += 1 # On continue
-					elif abs((start - end)/ratio) <= minSize:
-						start, end = None, None
-					else: break
-				# elif end: break
-			###
-			if end: break
-		###
-		
-		if end:
-			result = start % end # Point médian = doigt
-			scan[:,result.x,:] = [0, 255, 0] # On trace une bande verte
-			scan[result.y,:,:] = [0, 127, 0] # On trace une autre bande verte
-			result /= size # On remet en ratio d'image
-			result.x = 1 - result.x # On inverse le côté de mesure
-			this._DETECTED = result # On stocke le point détecté
-		else: result = None
-		return result
-		
 	# Traitement de l'image
 	# Algo par détection de couleur
 	def detectByColor(this, **kargs):
@@ -626,8 +535,8 @@ class Camera():
 			result = cv2.filter2D(result.astype(np.uint8), -1, kernel)
 		
 		# Résultat
-		this._BINARY = bin = np.zeros((height(this._FRAME), width(this._FRAME), 3), np.uint8)
-		bin[:,:,0] = bin[:,:,1] = bin[:,:,2] = (result > seuil) * 255
+		this._BINARY = bin = np.zeros((height(this._FRAME), width(this._FRAME)), np.uint8)
+		bin[:,:] = (result > seuil) * 255
 		
 		return {
 			"thermal": cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR),
@@ -654,8 +563,8 @@ class Camera():
 		diff = np.abs(frame.astype(int) - ref.astype(int))
 		
 		# Petit seuillage des familles
-		this._BINARY = delta = np.zeros((height(diff), width(diff), 3), np.uint8)
-		delta[:,:,0] = delta[:,:,1] = delta[:,:,2] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
+		this._BINARY = delta = np.zeros((height(diff), width(diff)), np.uint8)
+		delta[:,:] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
 		
 		return {
 			'AbsDiff': diff.astype(np.uint8),
@@ -707,11 +616,11 @@ class Camera():
 		diff = np.abs(this._FRAME.astype(int) - this._REF.astype(int))
 		
 		# Petit seuillage des familles
-		this._BINARY = bin = np.zeros((height(diff), width(diff), 3), np.uint8)
+		this._BINARY = bin = np.zeros((height(diff), width(diff)), np.uint8)
 		delta = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuilDiff) * 255
 		
 		result = (h/3 + a/3 + delta/3)
-		bin[:,:,0] = bin[:,:,1] = bin[:,:,2] = (result > seuilColor) * 255
+		bin[:,:] = (result > seuilColor) * 255
 		
 		return {
 			"result": this._SCAN.astype(np.uint8),
@@ -721,6 +630,170 @@ class Camera():
 			"cr": cr.astype(np.uint8),
 			"h": h.astype(np.uint8),
 			"a": a.astype(np.uint8)
+		}
+	
+	# Magnifique idée de Maxou, pas compliqué en plus !
+	# Saber: On additionne toutes les colonnes de 'binary'
+	# Et on threshold !
+	def saber(this, **kargs):
+		"""Vertical object detection:
+		Slice vertically and mesures height
+		 - threshold: (the minimum height of an object
+			x =< 1: Relative to image height
+			x > 1: Pixels
+		"""
+		
+		# Arguments
+		bin = kargs.get('bin', this._BINARY)
+		thresh = kargs.get('thresh', 0.5) # Seuillage hauteur
+		thresh = tresh if thresh > 1 else thresh * height(bin)
+		
+		# Somme verticale et seuillage
+		vsum = (bin!=0).sum(axis=0) >= thresh
+		
+		# Envoi du résultat dans la pipeline
+		bin[:,:] = vsum * 255
+		#this._BINARY = vsum
+	
+	# ------------------------------------------------------- #
+	
+	# Pour localiser le doigt sur une image binaire (noir/blanc)
+	# Skywalker: On compte le nombre de pixels sur une ligne en
+	# autorisant d'avancer dans le vide sur une distance donnée
+	def skywalker(this, **kargs):
+		"""Object detection in binary image by straight cut
+		Allow cutting for a bit through void:
+		 - offshore: distance allowed in the void to look
+		 - minSize: (the minimum size of an object)
+			x < 1: Relative to image width
+			x > 1: Pixels
+		 - bin: binary image to parse (3 channel matrix)
+		 - blur: add blur on 'bin' ? (bool)
+		"""
+		
+		# Arguments
+		bin = kargs.get('bin', this._BINARY)
+		offshore = kargs.get('offshore', 5)
+		minSize = kargs.get('minSize', 3)
+		blur = kargs.get('blur', False)
+		
+		if blur: # Flou de test
+			kernel = np.ones((3, 3), np.float32)/9
+			bin = cv2.filter2D(bin, -1, kernel)
+		
+		# On duplique l'image pour le rendu final
+		scan = EmptyFrom(bin, 3)
+		scan[:,:,0] = scan[:,:,1] = scan[:,:,2] = bin
+		this._SCAN = scan
+		
+		step = 0 # Compteur de pas dans le vide
+		start, end = None, None
+		
+		# Dimensions de l'image à scanner
+		size = D2Point(width(bin), height(bin))
+		ratio = size if minSize < 1 else 1
+		
+		# Scan pixel par pixel, en partant du bas
+		for v in xrange(int(size.y)-1, -1, -1):
+			for u in xrange(int(size.x)):
+			
+				if bin.item((v, u, 0)): # Si un pixel != 0:
+					scan[v,u] = [0, 0, 255] # Rouge.
+					step = 0 # On reset le jump
+					
+					# Si c'est le premier
+					if not start:
+						start = D2Point(u, v)
+						end = D2Point(u, v)
+					else: # On trace
+						end.x, end.y = u, v
+				
+				elif end:
+					if step < offshore:
+						scan[v,u] = [0, 255, 255] # Jaune
+						step += 1 # On continue
+					elif abs((start - end)/ratio) <= minSize:
+						start, end = None, None
+					else: break
+				# elif end: break
+			###
+			if end: break
+		###
+		
+		if end:
+			result = start % end # Point médian = doigt
+			scan[:,result.x,:] = [0, 255, 0] # On trace une bande verte
+			scan[result.y,:,:] = [0, 127, 0] # On trace une autre bande verte
+			result /= size # On remet en ratio d'image
+			result.x = 1 - result.x # On inverse le côté de mesure
+			this._DETECTED = result # On stocke le point détecté
+		else: result = None
+		return result
+	
+	# ------------------------------------------------------- #
+	
+	# Parametrage du blob
+	def setBloberUp(this, **kargs):
+		"""Set every parameter for the blob detection 
+		 - min/maxThresh: Threshold to apply (erm)
+		 - min/maxArea: Obvious.
+		 - min/maxCircularity: [0,1]
+		 - min/maxConvexity: [0,1]
+		 - min/maxInertia: [0,1]
+		 - minDist: minimal distance between blobs
+		"""
+		
+		# Setup SimpleBlobDetector parameters.
+		params = cv2.SimpleBlobDetector_Params()
+		
+		# Change thresholds
+		params.minThreshold = kargs.get('minThresh', 0);
+		params.maxThreshold = kargs.get('maxThresh', 255);
+		
+		# Filter by Area.
+		params.filterByArea = True
+		params.minArea = kargs.get('minArea', 0)
+		params.maxArea = kargs.get('maxArea', 0)
+		
+		# Filter by Circularity
+		params.filterByCircularity = True
+		params.minCircularity = kargs.get('maxCircularity', 0.0)
+		params.maxCircularity = kargs.get('maxCircularity', 1.0)
+		
+		# Filter by Convexity
+		params.filterByConvexity = True
+		params.minConvexity = kargs.get('minConvexity', 0.0)
+		params.maxConvexity = kargs.get('maxConvexity', 1.0)
+		
+		# Filter by Inertia
+		params.filterByInertia = True
+		params.minInertiaRatio = kargs.get('minInertia', 0.0)
+		params.maxInertiaRatio = kargs.get('maxInertia', 1.0)
+		
+		# Distance between blobs
+		params.minDistBetweenBlobs = kargs.get('minDist', 0)
+		
+		# Création du detecteur de blob
+		this.__BlobDetector = cv2.SimpleBlobDetector_create(params)
+	
+	# Algorithme de detection de blob
+	def blober(this, **kargs):
+		"""Blob detection
+		 - Arg: 
+		"""
+		
+		# Petite vérif
+		if not hasattr(this, '__BlobDetector'): this.setBloberUp()
+		blober = this.__BlobDetector
+		
+		bin = this._BINARY
+		scan = EmptyFrom(bin, 3)
+		
+		keypoints = blober.detect(bin)
+		truc = cv2.drawKeypoints(scan, keypoints, np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+		
+		return {
+			'keypoints': truc.astype(np.uint8)
 		}
 ###"""
 

@@ -1,5 +1,5 @@
 from WolfEyes.lib.camera import *
-import WolfEye.MouseControl as mouse
+import WolfEyes.MouseControl as mouse
 import math
 import time
 import cv2
@@ -33,7 +33,7 @@ while 1:
 	
 	click, finger = cam1 % cam2
 	if finger: print finger
-	if click: mouse.click(*finger.pos, click)
+	if click: mouse.drag(click, *finger.pos)
 	
 	cv2.imshow('cam1', cam1.frame)
 	cv2.imshow('cam1s', cam1.scan)
