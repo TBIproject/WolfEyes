@@ -736,9 +736,13 @@ class Camera():
 	def setBloberUp(this, **kargs):
 		"""Set every parameter for the blob detection 
 		 - min/maxThresh: Threshold to apply (erm)
+		 - Area: Filter by area (True/False)
 		 - min/maxArea: Obvious.
+		 - Circularity: Filter by circularity (True/False)
 		 - min/maxCircularity: [0,1]
+		 - Convexity: Filter by convexity (True/False)
 		 - min/maxConvexity: [0,1]
+		 - Inertia: Filter by inertia (True/False)
 		 - min/maxInertia: [0,1]
 		 - minDist: minimal distance between blobs
 		"""
@@ -751,22 +755,22 @@ class Camera():
 		params.maxThreshold = kargs.get('maxThresh', 255);
 		
 		# Filter by Area.
-		params.filterByArea = True
+		params.filterByArea = kargs.get('Area', False)
 		params.minArea = kargs.get('minArea', 0)
-		params.maxArea = kargs.get('maxArea', 0)
+		params.maxArea = kargs.get('maxArea', 1920*1080)
 		
 		# Filter by Circularity
-		params.filterByCircularity = True
-		params.minCircularity = kargs.get('maxCircularity', 0.0)
+		params.filterByCircularity = kargs.get('Circularity', False)
+		params.minCircularity = kargs.get('minCircularity', 0.0)
 		params.maxCircularity = kargs.get('maxCircularity', 1.0)
 		
 		# Filter by Convexity
-		params.filterByConvexity = True
+		params.filterByConvexity = kargs.get('Convexity', False)
 		params.minConvexity = kargs.get('minConvexity', 0.0)
 		params.maxConvexity = kargs.get('maxConvexity', 1.0)
 		
 		# Filter by Inertia
-		params.filterByInertia = True
+		params.filterByInertia = kargs.get('Inertia', False)
 		params.minInertiaRatio = kargs.get('minInertia', 0.0)
 		params.maxInertiaRatio = kargs.get('maxInertia', 1.0)
 		
@@ -787,13 +791,58 @@ class Camera():
 		blober = this.__BlobDetector
 		
 		bin = this._BINARY
-		scan = EmptyFrom(bin, 3)
+		thi._SCAN = scan = EmptyFrom(bin, 3)
 		
 		keypoints = blober.detect(bin)
 		truc = cv2.drawKeypoints(scan, keypoints, np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 		
 		return {
 			'keypoints': truc.astype(np.uint8)
+		}
+	
+	# Algorithme de détection de countours
+	def arounder(this, **kargs):
+		"""Function making use of OpenCV's contours.
+		 - maxCount: Maximum number of contours to process
+		 - minArea: Minimum area to look for
+		 - maxArea: Maximum area to look for
+		"""
+		
+		# Arguments
+		maxCount = kargs.get('maxCount', 200)
+		minArea = kargs.get('minArea', 0)
+		maxArea = kargs.get('maxArea', 10000000)
+		color = kargs.get('color', (0, 255, 0))
+		thick = kargs.get('thick', 3)
+		
+		# Image binaire issue de la détection
+		bin = this._BINARY.copy()
+		
+		# On duplique l'image pour le rendu final
+		this._SCAN = scan = EmptyFrom(bin, 3)
+		
+		# Remise en forme
+		input = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
+		
+		image, contours, hierarchy = cv2.findContours(
+			input,
+			cv2.RETR_TREE,
+			cv2.CHAIN_APPROX_SIMPLE
+		)
+		
+		count = len(contours)
+		if count > maxCount: raise Exception('Too much noise')
+		
+		objects = []
+		for contour in contours:
+			area = cv2.contourArea(contour)
+			if minArea <= area and area <= maxArea: objects.append(contour)
+		###
+		
+		printf('%d/%d%10s\r' % (len(objects), count, ''))
+		
+		return {
+			'contours': cv2.drawContours(this._FRAME.copy(), objects, -1, color, thick)
 		}
 ###"""
 

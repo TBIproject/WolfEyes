@@ -13,6 +13,13 @@ def channels(img):
 	shape = np.shape(img)
 	return shape[2] if len(shape) > 2 else 1
 
+# Constrain
+def constrain(min, max, *args):
+	result = []
+	for n in args: result.append(min if n < min else max if n > max else n)
+	if len(args) == 1: return result[0]
+	else: return tuple(result)
+	
 # Image vide (easypeasy)
 def Empty(**kargs):
 	channels = kargs.get('channels', 3)
