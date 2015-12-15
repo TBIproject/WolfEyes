@@ -28,9 +28,9 @@ while 1:
 	
 	# Détection
 	k = cam.arounder(
-		minArea=25,
+		minArea=50,
 		color=(255, 34, 0),
-		thick=5
+		thick=3
 	)
 	
 	# On bouge la souris si le doigt est détecté

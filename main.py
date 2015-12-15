@@ -4,13 +4,14 @@ import numpy as np
 import time
 import cv2
 
-width, height = (1280, 720)
+width, height = (640, 480)
 
 # Création de la caméra
 cam = Camera()
-cam.init(0, width=1280, height=720, exposure=-5)
+cam.init(0, width=width, height=height, exposure=-5)
 cam.setFOV(horizontal=math.radians(92.0))
-cam.setImageVertBand(0.45, 0.5)
+# cam.setImageVertBand(0.45, 0.5)
+cam.setImageVertBand(0.3, 0.6)
 
 def bouger_souris(x, y):
 	# TODO
@@ -32,7 +33,8 @@ while 1:
 	cam.skywalker(offshore=3, minSize=10)
 	
 	# On bouge la souris si le doigt est détecté
-	if cam.finger: bouger_souris(cam.finger.x, 0)
+	# if cam.finger: bouger_souris(cam.finger.x, 0)
+	print cam.finger
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)

@@ -30,4 +30,4 @@ def Empty(**kargs):
 # Image vide depuis une autre image
 def EmptyFrom(img, chan=None):
 	if not chan: chan = channels(img)
-	return Empty(height=height(img), width=width(img), channels=channels(img))
+	return Empty(height=height(img), width=width(img), channels=chan)

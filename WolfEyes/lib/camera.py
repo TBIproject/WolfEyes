@@ -697,7 +697,7 @@ class Camera():
 		for v in xrange(int(size.y)-1, -1, -1):
 			for u in xrange(int(size.x)):
 			
-				if bin.item((v, u, 0)): # Si un pixel != 0:
+				if bin.item((v, u)): # Si un pixel != 0:
 					scan[v,u] = [0, 0, 255] # Rouge.
 					step = 0 # On reset le jump
 					
@@ -783,6 +783,7 @@ class Camera():
 	# Algorithme de detection de blob
 	def blober(this, **kargs):
 		"""Blob detection
+		C'est de la merde en vrai
 		 - Arg: 
 		"""
 		
@@ -819,11 +820,12 @@ class Camera():
 		bin = this._BINARY.copy()
 		
 		# On duplique l'image pour le rendu final
-		this._SCAN = scan = EmptyFrom(bin, 3)
+		# this._SCAN = scan = EmptyFrom(bin, 3)
 		
 		# Remise en forme
 		input = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
 		
+		# Modifie l'image de départ T__T
 		image, contours, hierarchy = cv2.findContours(
 			input,
 			cv2.RETR_TREE,
@@ -831,7 +833,7 @@ class Camera():
 		)
 		
 		count = len(contours)
-		if count > maxCount: raise Exception('Too much noise')
+		if count > maxCount: raise Exception('Too much noise, please quiet.')
 		
 		objects = []
 		for contour in contours:
@@ -839,10 +841,19 @@ class Camera():
 			if minArea <= area and area <= maxArea: objects.append(contour)
 		###
 		
+		# Image de base
+		this._SCAN = scan = input
+		
+		# Visuel
 		printf('%d/%d%10s\r' % (len(objects), count, ''))
+		cv2.drawContours(scan, objects, -1, color, thick)
+		
+		if len(objects):
+			cnt = objects[0]
+			print tuple(cnt[cnt[:,:,1].argmax()][0])
 		
 		return {
-			'contours': cv2.drawContours(this._FRAME.copy(), objects, -1, color, thick)
+			'contours': scan
 		}
 ###"""
 
