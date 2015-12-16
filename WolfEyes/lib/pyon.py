@@ -1,7 +1,7 @@
 #WIP
 import json
 
-class pyon(dict):
+class pyon(object):
 	def __getattribute__(this, attr):
 		if attr in pyon.__dict__:
 			print 'ok'

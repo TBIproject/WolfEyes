@@ -3,14 +3,33 @@ from tbiTools import *
 import math
 
 # Plus simple pour gérer les points/vecteurs 2d
-class D2Point():
+class D2Point(object):
 	def __init__(this, x=0, y=0):
-		this.x = float(x)
-		this.y = float(y)
+		this.__X = float(x)
+		this.__Y = float(y)
+	
+	# Getters/Setters
+	
+	@property
+	def x(this): return this.__X
+	
+	@property
+	def y(this): return this.__Y
+	
+	@x.setter
+	def x(this, value):
+		r = this.__X = float(value)
+		return r
+	
+	@y.setter
+	def y(this, value):
+		r = this.__Y = float(value)
+		return r
 	
 	# ToString
 	def __str__(this):
 		return '(%s, %s)[%s]' % (this.x, this.y, abs(this))
+	def __repr__(this): return str(this)
 	
 	# Addition
 	def __add__(this, p):

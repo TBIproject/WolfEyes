@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from D2Point import *
 import numpy as np
 import sys
 
@@ -31,3 +32,19 @@ def Empty(**kargs):
 def EmptyFrom(img, chan=None):
 	if not chan: chan = channels(img)
 	return Empty(height=height(img), width=width(img), channels=chan)
+	
+# Retourne la liste des maximums d'un contour
+def cntMax(cnt):
+	start, end = None
+	for _ in xrange(len(cnt)):
+		i = cnt[:,:,1].argmax()
+		point = D2Point(cnt[i][0][0], cnt[i][0][1])
+		
+		if not start:
+			start = end = point
+			cnt[i][0] = [-1, -1]
+		elif point.y >= start.y: end = point
+		else: break
+	###
+	
+	return (start % end)

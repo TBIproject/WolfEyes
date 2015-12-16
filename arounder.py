@@ -9,7 +9,7 @@ width, height = (640, 480)
 
 # Création de la caméra
 cam = Camera()
-cam.init(0, width=width, height=height, exposure=-5)
+cam.init(0, width=width, height=height, exposure=-10)
 cam.setFOV(horizontal=math.radians(92.0))
 cam.setImageVertBand(0.45, 0.5)
 
@@ -29,8 +29,7 @@ while 1:
 	# Détection
 	k = cam.arounder(
 		minArea=50,
-		color=(255, 34, 0),
-		thick=3
+		thick=1
 	)
 	
 	# On bouge la souris si le doigt est détecté
@@ -41,7 +40,6 @@ while 1:
 	cv2.imshow('reference', cam.reference)
 	for name, img in k.iteritems(): cv2.imshow('src1%s'%name, img)
 	cv2.imshow('bin', cam.binary)
-	cv2.imshow('scan', cam.scan)
 	
 	# Input management
 	sKey = Camera.waitKey()

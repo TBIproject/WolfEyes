@@ -25,7 +25,7 @@ try: from D2Point import *
 except Exception as e: print e; exit()
 
 # Gestion du repère, en mesure d'angles relatifs
-class Space():
+class Space(object):
 	def __init__(this, o=0, i=0, j=0):
 		this.o = float(o)
 		this.i = float(i)
@@ -33,7 +33,7 @@ class Space():
 
 # """
 # Easy cam
-class Camera():
+class Camera(object):
 	"""Class helping with cameras and OpenCV (still brain fucked)
 	"""
 	
@@ -724,7 +724,7 @@ class Camera():
 			result = start % end # Point médian = doigt
 			scan[:,result.x,:] = [0, 255, 0] # On trace une bande verte
 			scan[result.y,:,:] = [0, 127, 0] # On trace une autre bande verte
-			result /= size # On remet en ratio d'image
+			result /= size-1 # On remet en ratio d'image
 			result.x = 1 - result.x # On inverse le côté de mesure
 			this._DETECTED = result # On stocke le point détecté
 		else: result = None
@@ -813,44 +813,60 @@ class Camera():
 		maxCount = kargs.get('maxCount', 200)
 		minArea = kargs.get('minArea', 0)
 		maxArea = kargs.get('maxArea', 10000000)
-		color = kargs.get('color', (0, 255, 0))
-		thick = kargs.get('thick', 3)
+		ignore = kargs.get('ignore', (0, 255, 0))
+		color = kargs.get('color', (0, 0, 255))
+		thick = kargs.get('thick', 1)
 		
 		# Image binaire issue de la détection
 		bin = this._BINARY.copy()
-		
-		# On duplique l'image pour le rendu final
-		# this._SCAN = scan = EmptyFrom(bin, 3)
 		
 		# Remise en forme
 		input = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
 		
 		# Modifie l'image de départ T__T
-		image, contours, hierarchy = cv2.findContours(
+		image, countours, hierarchy = cv2.findContours(
 			input,
 			cv2.RETR_TREE,
 			cv2.CHAIN_APPROX_SIMPLE
 		)
 		
-		count = len(contours)
+		# Comptation
+		count = len(countours)
 		if count > maxCount: raise Exception('Too much noise, please quiet.')
 		
-		objects = []
-		for contour in contours:
+		# Filtrage et localisation:
+		objects, ignored, fingers = [], [], []
+		for contour in countours:
+			
+			# Filtrage des contours selon l'aire
 			area = cv2.contourArea(contour)
-			if minArea <= area and area <= maxArea: objects.append(contour)
+			if minArea <= area and area <= maxArea:
+				
+				# Calcul de la position
+				obj = cv2.convexHull(contour)
+				finger = cntMax(obj)
+				
+				# Enregistrement
+				objects.append(obj)
+				fingers.append(finger)
+			
+			# Sinon on l'ignore
+			else: ignored.append(contour)
 		###
 		
-		# Image de base
-		this._SCAN = scan = input
+		# On duplique l'image pour le rendu final
+		this._SCAN = scan = EmptyFrom(bin, 3)
+		scan[:,:,0] = scan[:,:,1] = scan[:,:,2] = bin
 		
 		# Visuel
 		printf('%d/%d%10s\r' % (len(objects), count, ''))
+		cv2.drawContours(scan, ignored, -1, ignore, 1)
 		cv2.drawContours(scan, objects, -1, color, thick)
 		
-		if len(objects):
+		if 0 and len(objects):
 			cnt = objects[0]
-			print tuple(cnt[cnt[:,:,1].argmax()][0])
+			print cnt
+			print '%s %s' % (tuple(cnt[cnt[:,:,1].argmax()]), height(scan)-1)
 		
 		return {
 			'contours': scan
