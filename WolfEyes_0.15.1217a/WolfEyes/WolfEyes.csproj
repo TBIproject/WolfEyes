@@ -55,9 +55,6 @@
     <Reference Include="Emgu.CV">
       <HintPath>..\packages\VDK.EmguCV.x64.2.4.10.1\lib\net40\Emgu.CV.dll</HintPath>
     </Reference>
-    <Reference Include="Emgu.CV.GPU">
-      <HintPath>..\packages\VDK.EmguCV.x64.2.4.10.1\lib\net40\Emgu.CV.GPU.dll</HintPath>
-    </Reference>
     <Reference Include="Emgu.CV.ML">
       <HintPath>..\packages\VDK.EmguCV.x64.2.4.10.1\lib\net40\Emgu.CV.ML.dll</HintPath>
     </Reference>
