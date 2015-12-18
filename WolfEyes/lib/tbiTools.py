@@ -34,8 +34,9 @@ def EmptyFrom(img, chan=None):
 	return Empty(height=height(img), width=width(img), channels=chan)
 	
 # Retourne la liste des maximums d'un contour
-def cntMax(cnt):
-	start, end = None
+def cntMax(cnt, maxDist=0):
+	cnt = cnt.copy()
+	start = end = None
 	for _ in xrange(len(cnt)):
 		i = cnt[:,:,1].argmax()
 		point = D2Point(cnt[i][0][0], cnt[i][0][1])
@@ -43,7 +44,7 @@ def cntMax(cnt):
 		if not start:
 			start = end = point
 			cnt[i][0] = [-1, -1]
-		elif point.y >= start.y: end = point
+		elif point.y >= (start.y - maxDist): end = point
 		else: break
 	###
 	

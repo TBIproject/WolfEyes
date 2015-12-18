@@ -807,21 +807,26 @@ class Camera(object):
 		 - maxCount: Maximum number of contours to process
 		 - minArea: Minimum area to look for
 		 - maxArea: Maximum area to look for
+		 - ignore: Painting color for ignored contours
+		 - color: Painting color for accepted contours
+		 - thick: Lines thickness
 		"""
 		
 		# Arguments
 		maxCount = kargs.get('maxCount', 200)
-		minArea = kargs.get('minArea', 0)
 		maxArea = kargs.get('maxArea', 10000000)
+		minArea = kargs.get('minArea', 0)
+		maxDist = kargs.get('maxDist', 0)
 		ignore = kargs.get('ignore', (0, 255, 0))
 		color = kargs.get('color', (0, 0, 255))
 		thick = kargs.get('thick', 1)
 		
 		# Image binaire issue de la détection
 		bin = this._BINARY.copy()
+		input = bin.copy()
 		
 		# Remise en forme
-		input = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
+		# input = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
 		
 		# Modifie l'image de départ T__T
 		image, countours, hierarchy = cv2.findContours(
@@ -844,7 +849,7 @@ class Camera(object):
 				
 				# Calcul de la position
 				obj = cv2.convexHull(contour)
-				finger = cntMax(obj)
+				finger = cntMax(obj, maxDist)
 				
 				# Enregistrement
 				objects.append(obj)
@@ -863,10 +868,14 @@ class Camera(object):
 		cv2.drawContours(scan, ignored, -1, ignore, 1)
 		cv2.drawContours(scan, objects, -1, color, thick)
 		
-		if 0 and len(objects):
-			cnt = objects[0]
-			print cnt
-			print '%s %s' % (tuple(cnt[cnt[:,:,1].argmax()]), height(scan)-1)
+		if len(fingers):
+			
+			finger = D2Point(-1, -1)
+			for fing in fingers:
+				if finger.y <= fing.y: finger = fing
+			
+			scan[:, finger.x, :] = [255, 0, 0]
+			scan[finger.y, :, :] = [127, 0, 0]
 		
 		return {
 			'contours': scan

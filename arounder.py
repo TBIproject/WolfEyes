@@ -9,14 +9,9 @@ width, height = (640, 480)
 
 # Création de la caméra
 cam = Camera()
-cam.init(0, width=width, height=height, exposure=-10)
+cam.init(0, width=width, height=height, exposure=-5)
 cam.setFOV(horizontal=math.radians(92.0))
-cam.setImageVertBand(0.45, 0.5)
-
-def bouger_souris(x, y):
-	# TODO
-	print (x, y)
-###
+# cam.setImageVertBand(0.45, 0.5)
 
 print 'looping...'
 while 1:
@@ -24,13 +19,18 @@ while 1:
 	cam.getFrame()
 	
 	# Isolement
-	r = cam.detectByRef(seuil=150)
+	r = cam.detectByRef(seuil=100)
 	
 	# Détection
-	k = cam.arounder(
-		minArea=50,
-		thick=1
-	)
+	k = {}
+	try:
+		k = cam.arounder(
+			maxCount=1000,
+			minArea=50,
+			maxDist=100,
+			thick=1
+		)
+	except: print 'zblah'
 	
 	# On bouge la souris si le doigt est détecté
 	# if cam.finger: bouger_souris(cam.finger.x, 0)
