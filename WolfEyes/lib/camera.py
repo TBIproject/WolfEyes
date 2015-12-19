@@ -657,6 +657,16 @@ class Camera(object):
 	
 	# ------------------------------------------------------- #
 	
+	def morph_closing(this, **kargs):
+		bin = this._BINARY
+		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3)))
+	
+	def morph_opening(this, **kargs):
+		bin = this._BINARY
+		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_OPEN, np.ones((3,3)))
+	
+	# ------------------------------------------------------- #
+	
 	# Pour localiser le doigt sur une image binaire (noir/blanc)
 	# Skywalker: On compte le nombre de pixels sur une ligne en
 	# autorisant d'avancer dans le vide sur une distance donnée
@@ -829,35 +839,45 @@ class Camera(object):
 		# input = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
 		
 		# Modifie l'image de départ T__T
-		image, countours, hierarchy = cv2.findContours(
+		image, contours, hierarchy = cv2.findContours(
 			input,
-			cv2.RETR_TREE,
+			# cv2.RETR_TREE,
+			cv2.RETR_LIST,
 			cv2.CHAIN_APPROX_SIMPLE
 		)
 		
 		# Comptation
-		count = len(countours)
-		if count > maxCount: raise Exception('Too much noise, please quiet.')
+		finger = None
+		count = len(contours)
+		objects, ignored = [], []
+		if count < maxCount: #raise Exception('Too much noise, please quiet.')
+			
+			# Filtrage et localisation:
+			for contour in contours:
+				
+				# Filtrage des contours selon l'aire
+				area = cv2.contourArea(contour)
+				if minArea <= area and area <= maxArea:
+					
+					# Calcul de la position
+					obj = cv2.convexHull(contour)
+					point = limiter(obj, maxDist)
+					
+					# Est-ce le point le plus bas ?
+					if finger:
+						if finger.y < point.y: finger = point
+					else: finger = point
+					
+					# Enregistrement
+					objects.append(obj)
+				
+				# Sinon on l'ignore
+				else: ignored.append(contour)
+				
+			### END FOR
 		
-		# Filtrage et localisation:
-		objects, ignored, fingers = [], [], []
-		for contour in countours:
-			
-			# Filtrage des contours selon l'aire
-			area = cv2.contourArea(contour)
-			if minArea <= area and area <= maxArea:
-				
-				# Calcul de la position
-				obj = cv2.convexHull(contour)
-				finger = cntMax(obj, maxDist)
-				
-				# Enregistrement
-				objects.append(obj)
-				fingers.append(finger)
-			
-			# Sinon on l'ignore
-			else: ignored.append(contour)
-		###
+		### END IF
+		else: ignored = contours
 		
 		# On duplique l'image pour le rendu final
 		this._SCAN = scan = EmptyFrom(bin, 3)
@@ -868,14 +888,13 @@ class Camera(object):
 		cv2.drawContours(scan, ignored, -1, ignore, 1)
 		cv2.drawContours(scan, objects, -1, color, thick)
 		
-		if len(fingers):
-			
-			finger = D2Point(-1, -1)
-			for fing in fingers:
-				if finger.y <= fing.y: finger = fing
-			
+		# Affichage viseur
+		if finger:
 			scan[:, finger.x, :] = [255, 0, 0]
 			scan[finger.y, :, :] = [127, 0, 0]
+		
+		# On enregistre le truc
+		this._DETECTED = finger
 		
 		return {
 			'contours': scan
