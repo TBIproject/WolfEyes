@@ -1,25 +1,33 @@
-#WIP
 import json
 
-class pyon(object):
-	def __getattribute__(this, attr):
-		if attr in pyon.__dict__:
-			print 'ok'
-			return this.__getattr__(attr)
-		else: return this[attr] if attr in this else None
+class pyon(dict):
+	"""This class mimics the way JSON works in Javascript
+	(almost)"""
+	
+	def __init__(this, init={}, *args, **kargs):
+		dict.__init__(this, *args, **kargs)
+		this.load(init)
+		
+	def __getattr__(this, attr):
+		return this.get(attr, None)
 	
 	def __setattr__(this, attr, value):
 		this[attr] = value
 		return this[attr]
 	
-	def __str__(this):
-		return json.dumps(this)
+	def __delattr__(this, attr):
+		del this[attr]
 	
-	def load(this, json):
+	def __str__(this): return json.dumps(this)
+	def __repr__(this): return str(this)
+	
+	def copy(this):
+		copy = pyon()
+		return copy.load(this)
+	
+	def load(this, thing):
 		this.clear()
-		this.update(json.loads(json))
+		if isinstance(thing, str): this.update(json.loads(thing))
+		else: this.update(thing)
 		return this
-	
-	def unify(this):
-		return this.load(str(this))
 ### PYON

@@ -43,7 +43,7 @@ while 1:
 		finger = cam.finger
 		finger.x = 1 - finger.x
 		
-		cursor = D2Point(*~finger) * mouse.SCREEN
+		cursor = finger * mouse.SCREEN
 		mouse.move(*~cursor)
 		
 		if cam.finger.y == 1: print 'click'
