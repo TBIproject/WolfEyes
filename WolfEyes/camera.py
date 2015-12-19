@@ -902,7 +902,7 @@ class Camera(object):
 			size = D2Point(width(bin), height(bin))
 			
 			# Reformatage
-			finger /= size-2
+			finger = (finger-2)/(size-4)
 			finger.x = 1 - finger.x
 		
 		# On enregistre le truc

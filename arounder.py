@@ -19,6 +19,7 @@ cam.setImageVertBand(0, 0.5)
 mouse.SMOOTH = 5
 
 print 'looping...'
+cam.setReference(count=10)
 while 1:
 	# On filme
 	cam.getFrame()
@@ -33,7 +34,7 @@ while 1:
 	# Détection
 	k = cam.arounder(
 		maxCount=1000,
-		minArea=50,
+		minArea=16,
 		maxDist=10,
 		thick=1
 	)
@@ -46,7 +47,9 @@ while 1:
 		cursor = finger * mouse.SCREEN
 		mouse.move(*~cursor)
 		
-		if cam.finger.y == 1: print 'click'
+		if cam.finger.y == 1: printf('click\r')
+		
+		print finger
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)
