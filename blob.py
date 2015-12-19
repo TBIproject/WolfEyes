@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from WolfEyes.lib.camera import *
+from WolfEyes.camera import *
 import numpy as np
 import time
 import cv2

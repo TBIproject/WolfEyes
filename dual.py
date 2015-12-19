@@ -1,4 +1,4 @@
-from WolfEyes.lib.camera import *
+from WolfEyes.camera import *
 import WolfEyes.MouseControl as mouse
 import math
 import time

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from WolfEyes.lib.camera import *
+from WolfEyes.camera import *
+from WolfEyes.D2Point import *
+import WolfEyes.MouseControl as mouse
 import numpy as np
 import time
 import cv2
@@ -11,7 +13,10 @@ width, height = (640, 480)
 cam = Camera()
 cam.init(0, width=width, height=height, exposure=-5)
 cam.setFOV(horizontal=math.radians(92.0))
-cam.setImageVertBand(0.45, 0.5)
+# cam.setImageVertBand(0.45, 0.5)
+cam.setImageVertBand(0, 0.5)
+
+mouse.SMOOTH = 5
 
 print 'looping...'
 while 1:
@@ -34,7 +39,14 @@ while 1:
 	)
 	
 	# On bouge la souris si le doigt est détecté
-	# if cam.finger: bouger_souris(cam.finger.x, 0)
+	if cam.finger:
+		finger = cam.finger
+		finger.x = 1 - finger.x
+		
+		cursor = D2Point(*~finger) * mouse.SCREEN
+		mouse.move(*~cursor)
+		
+		if cam.finger.y == 1: print 'click'
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)

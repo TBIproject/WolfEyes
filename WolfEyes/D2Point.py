@@ -5,8 +5,8 @@ import math
 # Plus simple pour gérer les points/vecteurs 2d
 class D2Point(object):
 	def __init__(this, x=0, y=0):
-		this.__X = float(x)
-		this.__Y = float(y)
+		this.x = x
+		this.y = y
 	
 	# Getters/Setters
 	
@@ -64,22 +64,27 @@ class D2Point(object):
 	@property
 	def length(this): return abs(this)
 	@length.setter
-	def length(this, val): return this % val
+	def length(this, m):
+		size = this.length
+		if size: # Si le vecteur n'est pas nul
+			this.x *= float(m) / size
+			this.y *= float(m) / size
+		return this
 	
 	@property
-	def pos(this): return (this.x, this.y)
+	def int(this): return D2Point(int(this.x), int(this.y))
 	
-	# Vecteur unitaire (~D2Point)
+	# Conversion en tuple (~D2Point)
 	def __invert__(this):
-		size = abs(this)
-		u = 0 if not this.x else this.x / size
-		v = 0 if not this.y else this.y / size
-		return D2Point(u, v)
+		return (this.x, this.y)
 		
 	# Modulation/moyenne (a % b)
 	def __mod__(this, m):
 		if isinstance(m, D2Point): return (this + m) / 2.0
-		else: return (~this)*m
+		else: # Si c'est un réel
+			new = D2Point(1, 1)
+			new.length = m
+			return new
 	
 	# Réaction à "not this"
 	def __nonzero__(this): return True

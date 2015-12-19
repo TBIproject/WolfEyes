@@ -659,11 +659,11 @@ class Camera(object):
 	
 	def morph_closing(this, **kargs):
 		bin = this._BINARY
-		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3)))
+		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((5,5)))
 	
 	def morph_opening(this, **kargs):
 		bin = this._BINARY
-		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_OPEN, np.ones((3,3)))
+		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_OPEN, np.ones((5,5)))
 	
 	# ------------------------------------------------------- #
 	
@@ -730,17 +730,24 @@ class Camera(object):
 			if end: break
 		###
 		
-		if end:
-			result = start % end # Point médian = doigt
+		if end: # Si on a trouvé une fin
+			
+			# Point médian = doigt
+			result = start % end
+			
+			# Visuel
 			scan[:,result.x,:] = [0, 255, 0] # On trace une bande verte
 			scan[result.y,:,:] = [0, 127, 0] # On trace une autre bande verte
+			
+			# Reformatage
 			result /= size-1 # On remet en ratio d'image
 			result.x = 1 - result.x # On inverse le côté de mesure
+			
+			# Stockage
 			this._DETECTED = result # On stocke le point détecté
 		else: result = None
+		
 		return result
-	
-	# ------------------------------------------------------- #
 	
 	# Parametrage du blob
 	def setBloberUp(this, **kargs):
@@ -835,13 +842,9 @@ class Camera(object):
 		bin = this._BINARY.copy()
 		input = bin.copy()
 		
-		# Remise en forme
-		# input = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
-		
 		# Modifie l'image de départ T__T
 		image, contours, hierarchy = cv2.findContours(
 			input,
-			# cv2.RETR_TREE,
 			cv2.RETR_LIST,
 			cv2.CHAIN_APPROX_SIMPLE
 		)
@@ -888,10 +891,19 @@ class Camera(object):
 		cv2.drawContours(scan, ignored, -1, ignore, 1)
 		cv2.drawContours(scan, objects, -1, color, thick)
 		
-		# Affichage viseur
+		# Si on a trouvé
 		if finger:
+			
+			# Affichage viseur
 			scan[:, finger.x, :] = [255, 0, 0]
 			scan[finger.y, :, :] = [127, 0, 0]
+			
+			# Calcul de la taille de l'image
+			size = D2Point(width(bin), height(bin))
+			
+			# Reformatage
+			finger /= size-2
+			finger.x = 1 - finger.x
 		
 		# On enregistre le truc
 		this._DETECTED = finger

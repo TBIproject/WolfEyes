@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from WolfEyes.lib.camera import *
+from WolfEyes.camera import *
 import numpy as np
 import time
 import cv2
@@ -10,13 +10,7 @@ width, height = (640, 480)
 cam = Camera()
 cam.init(0, width=width, height=height, exposure=-5)
 cam.setFOV(horizontal=math.radians(92.0))
-# cam.setImageVertBand(0.45, 0.5)
-cam.setImageVertBand(0.3, 0.6)
-
-def bouger_souris(x, y):
-	# TODO
-	print (x, y)
-###
+cam.setImageVertBand(0.45, 0.5)
 
 print 'looping...'
 while 1:
