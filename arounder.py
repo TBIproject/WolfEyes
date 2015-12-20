@@ -11,7 +11,7 @@ width, height = (640, 480)
 
 # Création de la caméra
 cam = Camera()
-cam.init(0, width=width, height=height, exposure=-5)
+cam.init(0, width=width, height=height, exposure=-10)
 cam.setFOV(horizontal=math.radians(92.0))
 # cam.setImageVertBand(0.45, 0.5)
 cam.setImageVertBand(0, 0.5)
@@ -23,16 +23,12 @@ cam.setReference(count=10)
 while 1:
 	# On filme
 	cam.getFrame()
-	# cam.resetBin()
-	
-	# Calcul+
-	cam.fgExtract()
 	
 	# Isolement
 	r = cam.detectByRef(seuil=100)
 	
 	# Amélioration:
-	cam.fgCompensate()
+	cam.fgMagic()
 	
 	# Détection
 	k = cam.arounder(
@@ -50,9 +46,7 @@ while 1:
 		cursor = finger * mouse.SCREEN
 		mouse.move(*~cursor)
 		
-		if cam.finger.y == 1: printf('click\r')
-		
-		print finger
+		if cam.clic: printf('click\r')
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)

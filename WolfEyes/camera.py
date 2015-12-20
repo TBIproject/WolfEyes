@@ -313,12 +313,19 @@ class Camera(object):
 		this._KERNEL = np.ones((size, size), np.float32) / (size**2)
 	
 	# On récupère une frame (ou une portion selon la config)
-	def getFrame(this, error=3):
-		"""Frame retreiving and formatting"""
+	def getFrame(this, error=3, **kargs):
+		"""Frame retreiving and formatting
+		 - noReset: do not reset binary image (True/False)
+		 - error: times to tryhard
+		"""
 		this.checkInit()
 		
+		# Arguments
+		error = kargs.get('error', 3)
+		noReset = kargs.get('noReset', False)
+		
 		# """
-		while error>=0:
+		while error >= 0:
 			ret, frame = this._CAP.read()
 			if ret:
 				a = this._BAND.x * height(frame)
@@ -328,20 +335,13 @@ class Camera(object):
 					this._FRAME = cv2.filter2D(frame, -1, this._KERNEL)
 				else: this._FRAME = frame
 				break #bye
+			
 			# On a pas eu d'image...
 			else: error -= 1
+			
+		# On doit reset ou pas ?
+		if not noReset: this.resetBin()
 		return ret
-		"""
-		ret, frame = this._CAP.read()
-		if ret:
-			a = this._BAND.x * height(frame)
-			b = this._BAND.y * height(frame)
-			frame = frame[a:b:this._RES,:,:]
-			if this._KERNEL is not None: # On applique un flou uniquement pour lisser le bruit
-				this._FRAME = cv2.filter2D(frame, -1, this._KERNEL)
-			else: this._FRAME = frame
-		return ret
-		"""#"""
 		
 	# On stocke l'image de référence
 	def setReference(this, **kargs):
@@ -488,7 +488,7 @@ class Camera(object):
 		except: return (False, None)
 		
 		# Si les doigts sont détectés à la position minimale
-		click = (this.finger.y == 0 and cam.finger.y == 0)
+		click = (this.clic and cam.clic)
 		
 		# Si ya click
 		return (click, D2Point(x, y))
@@ -682,6 +682,16 @@ class Camera(object):
 		"""
 		this._BINARY = bin = (np.logical_or(this._BINARY, this._FGMASK) * 255).astype(np.uint8)
 		return bin
+	
+	# Mode auto
+	def fgMagic(this, **kargs):
+		"""Simplifaction, do the followings:
+		 * fgExtract
+		 * fgCompensate
+		"""
+		this.fgExtract()
+		this.fgCompensate()
+		return 'Magic !'
 	
 	# ------------------------------------------------------- #
 	
@@ -936,9 +946,10 @@ class Camera(object):
 			size = D2Point(width(bin), height(bin))
 			
 			# Reformatage
+			origin = +finger
 			finger /= size-1
 			finger.x = 1 - finger.x
-			this._BOTTOM = ((finger-2)/(size-4)).y == 1
+			this._BOTTOM = (origin-2).y == (size-4).y
 		
 		# Sinon on arrête de cliquer
 		else: this._BOTTOM = False
