@@ -92,12 +92,21 @@ class Camera(object):
 		# Dernière detection
 		this._DETECTED = None
 		
+		# Clic
+		this._BOTTOM = False
+		
 		# Image de référence (pas forcément utilisé, selon l'algo)
 		this._REF = Empty()
 		
 		# Matrice de flou
 		this._KERNEL = None
-	
+		
+		# Objet de suppression d'arrière plan
+		this._MOG2 = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
+		
+		# Image de soustraction d'arrière plan
+		this._FGMASK = Empty(channels=1)
+		
 	# Destruction de la caméra (del this)
 	def __del__(this):
 		"""Destructor (del this)"""
@@ -157,6 +166,11 @@ class Camera(object):
 	def finger(this):
 		"""Detected finger position"""
 		return this._DETECTED
+		
+	@property
+	def clic(this):
+		"""Detected virtual click"""
+		return this._BOTTOM
 	
 	@property
 	def binary(this):
@@ -171,7 +185,7 @@ class Camera(object):
 	# Reset de l'isolement
 	def resetBin(this):
 		"""Reset the binary image"""
-		this._BINARY = Empty(channels=1)
+		this._BINARY = EmptyFrom(this._FRAME, 1)
 		
 	# ------------------------------------------------------- #
 	
@@ -563,7 +577,7 @@ class Camera(object):
 		diff = np.abs(frame.astype(int) - ref.astype(int))
 		
 		# Petit seuillage des familles
-		this._BINARY = delta = np.zeros((height(diff), width(diff)), np.uint8)
+		this._BINARY = delta = EmptyFrom(diff, 1)
 		delta[:,:] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
 		
 		return {
@@ -655,6 +669,20 @@ class Camera(object):
 		bin[:,:] = vsum * 255
 		#this._BINARY = vsum
 	
+	# Utilisation du MOG2: Extraction
+	def fgExtract(this, **kargs):
+		"""Isolate the foreground
+		"""
+		this._FGMASK = fgmask = this._MOG2.apply(this._FRAME)
+		return fgmask
+	
+	# Utilisation du MOG2: Addition
+	def fgCompensate(this, **kargs):
+		"""
+		"""
+		this._BINARY = bin = (np.logical_or(this._BINARY, this._FGMASK) * 255).astype(np.uint8)
+		return bin
+	
 	# ------------------------------------------------------- #
 	
 	def morph_closing(this, **kargs):
@@ -745,8 +773,14 @@ class Camera(object):
 			
 			# Stockage
 			this._DETECTED = result # On stocke le point détecté
-		else: result = None
+			this._BOTTOM = result.y == 1 # On clic ou bien ?
 		
+		# Si rien
+		else:
+			result = None
+			this._BOTTOM = False
+		
+		# Tchao
 		return result
 	
 	# Parametrage du blob
@@ -902,8 +936,12 @@ class Camera(object):
 			size = D2Point(width(bin), height(bin))
 			
 			# Reformatage
-			finger = (finger-2)/(size-4)
+			finger /= size-1
 			finger.x = 1 - finger.x
+			this._BOTTOM = ((finger-2)/(size-4)).y == 1
+		
+		# Sinon on arrête de cliquer
+		else: this._BOTTOM = False
 		
 		# On enregistre le truc
 		this._DETECTED = finger

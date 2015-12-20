@@ -23,13 +23,16 @@ cam.setReference(count=10)
 while 1:
 	# On filme
 	cam.getFrame()
+	# cam.resetBin()
+	
+	# Calcul+
+	cam.fgExtract()
 	
 	# Isolement
 	r = cam.detectByRef(seuil=100)
 	
 	# Amélioration:
-	# cam.morph_closing()
-	# cam.morph_opening()
+	cam.fgCompensate()
 	
 	# Détection
 	k = cam.arounder(
