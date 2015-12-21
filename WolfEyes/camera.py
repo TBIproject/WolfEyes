@@ -13,16 +13,12 @@ try: # On essaye d'importer cv2
 	if v[0] != '3': print "OpenCV 3.x required, got %s..." % (v); exit()
 	del v # tout propre
 except: print 'OpenCV 3.x is required... Missing'; exit()
+import numpy as np
 
-# On essaye d'importer NumPy
-try: import numpy as np
-except Exception as e: print e; exit()
-# On essaye d'importer les outils
-try: from tbiTools import *
-except Exception as e: print e; exit()
-# On essaye d'importer les points/vecteurs 2D
-try: from D2Point import *
-except Exception as e: print e; exit()
+# Popote perso
+from tbiTools import *
+from D2Point import *
+from pyon import *
 
 # Gestion du repère, en mesure d'angles relatifs
 class Space(object):
@@ -125,7 +121,7 @@ class Camera(object):
 		this.checkInit()
 		this._CAP.set(Camera.props.get(prop, prop), value)
 	
-	# ------------------------------------------------------- #
+	# ------------------------------------------------------- # ------------------------------------------------------- #
 	# Là on commence la race de getters...
 	
 	@property
@@ -187,7 +183,7 @@ class Camera(object):
 		"""Reset the binary image"""
 		this._BINARY = EmptyFrom(this._FRAME, 1)
 		
-	# ------------------------------------------------------- #
+	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
 	# Pour configurer et démarrer la cam
 	def init(this, id, **kargs):
@@ -417,7 +413,7 @@ class Camera(object):
 		Camera.releaseAll()
 		cv2.destroyAllWindows()
 	
-	# ------------------------------------------------------- #
+	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
 	# Pour calibrer la caméra
 	def calibrate(this, display=False): # C'est des maths.
@@ -496,7 +492,7 @@ class Camera(object):
 	# Simplification (cam1 % cam2)
 	def __mod__(this, cam): return this.fingerPosition(cam)
 	
-	# ------------------------------------------------------- #
+	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
 	# Traitement de l'image
 	# Algo par détection de couleur
@@ -574,15 +570,15 @@ class Camera(object):
 		ref = kargs.get('ref', this._REF)
 		
 		# On fait la différence et on extrait les composantes RGB
-		diff = np.abs(frame.astype(int) - ref.astype(int))
+		diff = cv2.absdiff(frame, ref)
 		
 		# Petit seuillage des familles
 		this._BINARY = delta = EmptyFrom(diff, 1)
 		delta[:,:] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
 		
 		return {
-			'AbsDiff': diff.astype(np.uint8),
-			'Threshold': delta.astype(np.uint8)
+			'AbsDiff': diff,
+			'Threshold': delta
 		}
 		
 	# Traitement de l'image
@@ -693,7 +689,7 @@ class Camera(object):
 		this.fgCompensate()
 		return 'Magic !'
 	
-	# ------------------------------------------------------- #
+	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
 	def morph_closing(this, **kargs):
 		bin = this._BINARY
@@ -703,7 +699,7 @@ class Camera(object):
 		bin = this._BINARY
 		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_OPEN, np.ones((5,5)))
 	
-	# ------------------------------------------------------- #
+	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
 	# Pour localiser le doigt sur une image binaire (noir/blanc)
 	# Skywalker: On compte le nombre de pixels sur une ligne en
@@ -760,7 +756,7 @@ class Camera(object):
 					if step < offshore:
 						scan[v,u] = [0, 255, 255] # Jaune
 						step += 1 # On continue
-					elif abs((start - end)/ratio) <= minSize:
+					elif abs((start - end)/ratio) < minSize:
 						start, end = None, None
 					else: break
 				# elif end: break
@@ -853,7 +849,7 @@ class Camera(object):
 		blober = this.__BlobDetector
 		
 		bin = this._BINARY
-		thi._SCAN = scan = EmptyFrom(bin, 3)
+		this._SCAN = scan = EmptyFrom(bin, 3)
 		
 		keypoints = blober.detect(bin)
 		truc = cv2.drawKeypoints(scan, keypoints, np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)

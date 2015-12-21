@@ -4,6 +4,12 @@ import math
 
 # Plus simple pour gérer les points/vecteurs 2d
 class D2Point(object):
+	"""Some custom vector"""
+	
+	# Valeur d'arrondi extrême
+	ROUND = 14
+	
+	# Init
 	def __init__(this, x=0, y=0):
 		this.x = x
 		this.y = y
@@ -11,10 +17,10 @@ class D2Point(object):
 	# Getters/Setters
 	
 	@property
-	def x(this): return this.__X
+	def x(this): return round(this.__X, this.ROUND)
 	
 	@property
-	def y(this): return this.__Y
+	def y(this): return round(this.__Y, this.ROUND)
 	
 	@x.setter
 	def x(this, value):
@@ -51,16 +57,23 @@ class D2Point(object):
 		if isinstance(r, D2Point): return D2Point(this.x * r.x, this.y * r.y)
 		else: return D2Point(this.x * r, this.y * r)
 	
+	# Puissance
+	def __pow__(this, r):
+		if isinstance(r, D2Point): return D2Point(this.x ** r.x, this.y ** r.y)
+		else: return D2Point(this.x ** r, this.y ** r)
+	
 	# Opposé
 	def __neg__(this): return D2Point(-this.x, -this.y)
 	
 	# Clone (+D2Point)
 	def __pos__(this): return D2Point(this.x, this.y)
+	def clone(this): return +this
 	
 	# Module/Taille
 	def __abs__(this): return math.sqrt(this.x**2 + this.y**2)
 	def __len__(this): return abs(this)
 	
+	# Taille du vecteur
 	@property
 	def length(this): return abs(this)
 	@length.setter
@@ -71,20 +84,71 @@ class D2Point(object):
 			this.y *= float(m) / size
 		return this
 	
+	# Partie entière
 	@property
 	def int(this): return D2Point(int(this.x), int(this.y))
 	
 	# Conversion en tuple (~D2Point)
-	def __invert__(this):
-		return (this.x, this.y)
+	def __invert__(this): return (this.x, this.y)
+	def tuple(this): return ~this
 		
 	# Modulation/moyenne (a % b)
 	def __mod__(this, m):
 		if isinstance(m, D2Point): return (this + m) / 2.0
 		else: # Si c'est un réel
-			new = D2Point(1, 1)
+			new = +this
 			new.length = m
 			return new
+	
+	# Vecteur unitaire
+	@property
+	def unit(this): return this % 1
+	
+	# Pente/Direction
+	@property
+	def slope(this):
+		try: return this.y / this.x
+		except: return None
+	
+	# Direction (angle)
+	@property
+	def direction(this):
+		return math.atan(this.slope)
+	
+	# Changement de direction
+	@direction.setter
+	def direction(this, rad):
+		length = this.length
+		dir = D2Point.createUnit(rad)
+		this.x = dir.x * length
+		this.y = dir.y * length
+	
+	# Easy Degrees
+	@property
+	def directionDeg(this):
+		return math.degrees(this.direction)
+	
+	# Création de vecteurs unitaires
+	@staticmethod
+	def createUnit(rad=0):
+		return D2Point(math.cos(rad), math.sin(rad))
+		
+	# Easy Degrees
+	@staticmethod
+	def createUnitDeg(deg=0):
+		return D2Point.createUnit(math.radians(deg))
+	
+	# Rotation du vecteur
+	def rotate(this, rad):
+		z = complex(this.x, this.y)
+		u = D2Point.createUnit(rad)
+		c = complex(u.x, u.y)
+		new = z * c
+		return D2Point(new.real, new.imag)
+	
+	# Easy Degrees
+	def rotateDeg(this, deg):
+		return this.rotate(math.radians(deg))
 	
 	# Réaction à "not this"
 	def __nonzero__(this): return True

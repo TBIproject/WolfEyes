@@ -4,9 +4,9 @@ class pyon(dict):
 	"""This class mimics the way JSON works in Javascript
 	(almost)"""
 	
-	def __init__(this, init={}, *args, **kargs):
+	def __init__(this, init=None, *args, **kargs):
 		dict.__init__(this, *args, **kargs)
-		this.load(init)
+		if init: this.load(init)
 		
 	def __getattr__(this, attr):
 		return this.get(attr, None)
