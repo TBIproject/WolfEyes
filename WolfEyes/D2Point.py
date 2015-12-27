@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from tbiTools import *
 import math
 
 # Plus simple pour gérer les points/vecteurs 2d

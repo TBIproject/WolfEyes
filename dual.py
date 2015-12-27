@@ -1,8 +1,5 @@
-from WolfEyes.camera import *
-import WolfEyes.MouseControl as mouse
-import math
-import time
-import cv2
+# -*- coding: utf-8 -*-
+from WolfEyes.work import *
 
 cam1 = Camera()
 cam1.init(0, exposure=-5, width=1920, height=1080)

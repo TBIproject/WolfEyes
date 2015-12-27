@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-from WolfEyes.camera import *
-from WolfEyes.D2Point import *
-import WolfEyes.MouseControl as mouse
-import numpy as np
-import time
-import cv2
+from WolfEyes.work import *
 
 W, H = (1280, 720)
 W, H = (640, 480)

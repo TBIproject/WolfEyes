@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-from WolfEyes.camera import *
-import numpy as np
-import time
-import cv2
+from WolfEyes.work import *
 
 width, height = (640, 480)
 

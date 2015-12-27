@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 
 class pyon(dict):
@@ -17,6 +18,9 @@ class pyon(dict):
 	
 	def __delattr__(this, attr):
 		del this[attr]
+		
+	def __missing__(this, attr):
+		return None
 	
 	def __str__(this): return json.dumps(this)
 	def __repr__(this): return str(this)
