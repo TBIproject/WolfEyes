@@ -5,12 +5,16 @@ class pyon(dict):
 	"""This class mimics the way JSON works in Javascript
 	(almost)"""
 	
-	def __init__(this, init=None, *args, **kargs):
+	def __init__(this, init=None, unknown=None, *args, **kargs):
 		dict.__init__(this, *args, **kargs)
+		this.__dict__['_unknown'] = unknown
 		if init: this.load(init)
-		
+	
+	def setUnknown(this, value):
+		this._unknown = value;
+	
 	def __getattr__(this, attr):
-		return this.get(attr, None)
+		return this.get(attr, this._unknown)
 	
 	def __setattr__(this, attr, value):
 		this[attr] = value
@@ -20,7 +24,7 @@ class pyon(dict):
 		del this[attr]
 		
 	def __missing__(this, attr):
-		return None
+		return this._unknown
 	
 	def __str__(this): return json.dumps(this)
 	def __repr__(this): return str(this)

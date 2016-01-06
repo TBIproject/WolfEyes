@@ -24,7 +24,7 @@ import cv2
 np = numpy
 mouse = MouseControl
 
-# On remet comme ça va bien
+# On remet comme รงa va bien
 sys.stdout = OUT
 NUL.close()
 

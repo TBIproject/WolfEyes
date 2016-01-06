@@ -28,9 +28,8 @@ while 1:
 	print cam.finger
 	
 	# Affichage
+	# cv2.imshow('reference', cam.reference)
 	cv2.imshow('source', cam.frame)
-	cv2.imshow('reference', cam.reference)
-	# for name, img in r.iteritems(): cv2.imshow('src1%s'%name, img)
 	cv2.imshow('scan', cam.scan)
 	
 	# Input management

@@ -66,7 +66,7 @@ class Camera(object):
 		this._POS = D2Point()
 		
 		# Coordonnées du repère
-		this._SPACE = Space()
+		this._SPACE = pyon(unknown=-1)
 		
 		# Angles (w:x/h:y) de la caméra
 		# EN RADIANS !!
@@ -102,6 +102,9 @@ class Camera(object):
 		
 		# Image de soustraction d'arrière plan
 		this._FGMASK = Empty(channels=1)
+		
+		# Kernel pour le débruitage
+		this._ANOISEK = None
 		
 	# Destruction de la caméra (del this)
 	def __del__(this):
@@ -191,7 +194,7 @@ class Camera(object):
 		if this._CAP: this.release()
 		this._CAP = cv2.VideoCapture(id)
 		this.config(
-			exposure=kargs.get('exposure', this.exposure),
+			# exposure=kargs.get('exposure', this.exposure),
 			height=kargs.get('height', this.height),
 			width=kargs.get('width', this.width),
 			fps=kargs.get('fps', this.fps)
@@ -389,6 +392,22 @@ class Camera(object):
 		if count > 1: print 'ok'
 		return result
 	
+	# On affiche la tarte aux pommes
+	def drawSpace(this, **kargs):
+		"""Call me maybe"""
+		
+		space = this._SPACE
+		if not space: return None
+		
+		scan = this._SCAN
+		w = width(scan)
+		
+		# Impression
+		scan[:, space.o * w, :] = [255, 255, 0]
+		scan[:, space.i * w, :] = [0, 255, 255]
+		scan[:, space.j * w, :] = [255, 0, 255]
+		return True
+	
 	# On récupère la position détectée puis RàZ
 	def grabDetected(this):
 		"""Read and erase last finger position"""
@@ -420,14 +439,24 @@ class Camera(object):
 		"""Sets camera's position according to the space"""
 		# a -> Angle Alpha
 		# b -> Angle Beta
-		a = this._FOV.x * (this._SPACE.i - this._SPACE.o)
-		b = this._FOV.x * (this._SPACE.o - this._SPACE.j)
 		
-		try: # On essaye gentillement
+		# Verif de l'espace
+		space = this._SPACE
+		if not space: return None
+		
+		#try:
+		try:
+		
+			# Calcul d'angles
+			a = this._FOV.x * (space.i - space.o)
+			b = this._FOV.x * (space.o - space.j)
+		
+			# On essaye gentillement
 			Ca = 1 - 1.0/math.tan(a)
 			Cb = 1 - 1.0/math.tan(b)
 			k = Cb/Ca
 			
+			# Position finale
 			this._POS.x = x = (1 + k / math.tan(a)) / (1 + k**2)
 			this._POS.y = x * k
 		
@@ -570,7 +599,8 @@ class Camera(object):
 		ref = kargs.get('ref', this._REF)
 		
 		# On fait la différence et on extrait les composantes RGB
-		diff = cv2.absdiff(frame, ref)
+		# diff = cv2.absdiff(frame, ref)
+		diff = np.abs(frame.astype(int) - ref.astype(int)).astype(np.uint8)
 		
 		# Petit seuillage des familles
 		this._BINARY = delta = EmptyFrom(diff, 1)
@@ -674,7 +704,7 @@ class Camera(object):
 	
 	# Utilisation du MOG2: Addition
 	def fgCompensate(this, **kargs):
-		"""
+		"""Apply logical 'or' to the original detection and foreground mask
 		"""
 		this._BINARY = bin = (np.logical_or(this._BINARY, this._FGMASK) * 255).astype(np.uint8)
 		return bin
@@ -688,8 +718,41 @@ class Camera(object):
 		this.fgExtract()
 		this.fgCompensate()
 		return 'Magic !'
+		
+	# Création du kernel de traitement
+	def setAnoisek(this, **kargs):
+		"""Creates the kernel for de-noising
+		 - radius: kernel's radius
+		"""
+		
+		# Arguments
+		radius = kargs.get('radius', 3)
+		
+		# Kernel magic
+		this._ANOISEK = kernel = anoisek(radius)
+		return kernel
+		
+	# Truc de ouf
+	def anoise(this, *args, **kargs):
+		"""Tries to denoise the binary output
+		 ! You need to call 'this.anoisek' !
+		"""
+		
+		# Arguments
+		if not args: args = [100]
+		
+		# Kernel's retrieval
+		anoisek = this._ANOISEK
+		if anoisek is None: return None
+		
+		# More magic
+		bin = this._BINARY
+		for thresh in args:
+			bin[:,:] = (cv2.filter2D(bin, -1, anoisek) > thresh) * 255
+		return True
 	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
+	# Du caca
 	
 	def morph_closing(this, **kargs):
 		bin = this._BINARY
