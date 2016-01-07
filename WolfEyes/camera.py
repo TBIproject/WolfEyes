@@ -66,7 +66,7 @@ class Camera(object):
 		this._POS = D2Point()
 		
 		# Coordonnées du repère
-		this._SPACE = pyon(unknown=-1)
+		this._SPACE = pyon(unknown=2)
 		
 		# Angles (w:x/h:y) de la caméra
 		# EN RADIANS !!
@@ -403,9 +403,9 @@ class Camera(object):
 		w = width(scan)
 		
 		# Impression
-		scan[:, space.o * w, :] = [255, 255, 0]
-		scan[:, space.i * w, :] = [0, 255, 255]
-		scan[:, space.j * w, :] = [255, 0, 255]
+		scan[:, (1 - space.o) * w, :] = [255, 255, 0]
+		scan[:, (1 - space.i) * w, :] = [0, 255, 255]
+		scan[:, (1 - space.j) * w, :] = [255, 0, 255]
 		return True
 	
 	# On récupère la position détectée puis RàZ
@@ -990,7 +990,7 @@ class Camera(object):
 		scan[:,:,0] = scan[:,:,1] = scan[:,:,2] = bin
 		
 		# Visuel
-		printf('%d/%d%10s\r' % (len(objects), count, ''))
+		printf('%d/%d%60s\r' % (len(objects), count, ''))
 		cv2.drawContours(scan, ignored, -1, ignore, 1)
 		cv2.drawContours(scan, objects, -1, color, thick)
 		

@@ -22,29 +22,16 @@ while 1:
 	cam.getFrame()
 	
 	# Isolement
-	r = cam.detectByRef(seuil=30)
-	
-	# Test du anoise
-	cam.anoise(150, 150)
-	
-	"""
-	kernel = np.array([
-		[0, 0.5, 1, 0.5, 0],
-		[0.5, 1, 1, 1, 0.5],
-		[1, 1, 0, 1, 1],
-		[0.5, 1, 1, 1, 0.5],
-		[0, 0.5, 1, 0.5, 0]
-	], np.float32)
-	kernel /= kernel.sum()
-	
-	test = ((cv2.filter2D(cam.binary, -1, kernel) > 255/3.0) * 255).astype(np.uint8)
-	# """
+	# r = cam.detectByRef(seuil=30)
 	
 	# Amélioration:
-	# cam.fgMagic()
+	cam.fgMagic()
+	
+	# Test du anoise
+	cam.anoise(100)
 	
 	# Détection
-	k = cam.arounder(
+	cam.arounder(
 		maxCount=1000,
 		minArea=36,
 		maxDist=10,
@@ -57,7 +44,7 @@ while 1:
 		finger.x = 1 - finger.x
 		
 		cursor = finger * mouse.SCREEN
-		mouse.move(*~cursor)
+		# mouse.move(*~cursor)
 		
 		if cam.clic: printf('click\r')
 	
@@ -67,8 +54,7 @@ while 1:
 	# Affichage
 	cv2.imshow('source', cam.frame)
 	cv2.imshow('reference', cam.reference)
-	for name, img in k.iteritems(): cv2.imshow('src1%s'%name, img)
-	cv2.imshow('bin', cam.binary)
+	cv2.imshow('scan', cam.scan)
 	
 	# Input management
 	sKey = Camera.waitKey()
