@@ -53,7 +53,7 @@ class Camera(object):
 	CAMERAS = set()
 	
 	# Constructeur
-	def __init__(this):
+	def __init__(this, **kargs):
 		"""Constructor"""
 		
 		# On stocke la caméra dans un ensemble
@@ -98,7 +98,7 @@ class Camera(object):
 		this._KERNEL = None
 		
 		# Objet de suppression d'arrière plan
-		this._MOG2 = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
+		this._MOG2 = cv2.createBackgroundSubtractorMOG2(detectShadows=False, **kargs)
 		
 		# Image de soustraction d'arrière plan
 		this._FGMASK = Empty(channels=1)
@@ -186,6 +186,14 @@ class Camera(object):
 		"""Reset the binary image"""
 		this._BINARY = EmptyFrom(this._FRAME, 1)
 		
+	# Affichage "complexe"
+	@property
+	def stream(this):
+		"""Displays the scan and the current frame"""
+		scan = this._SCAN
+		frame = this._FRAME
+		return np.bitwise_or(np.bitwise_and((np.logical_not(scan) * 255).astype(np.uint8), frame), scan)
+		
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
 	# Pour configurer et démarrer la cam
@@ -193,12 +201,8 @@ class Camera(object):
 		"""Capture and camera initialisation"""
 		if this._CAP: this.release()
 		this._CAP = cv2.VideoCapture(id)
-		this.config(
-			# exposure=kargs.get('exposure', this.exposure),
-			height=kargs.get('height', this.height),
-			width=kargs.get('width', this.width),
-			fps=kargs.get('fps', this.fps)
-		)
+		this.config(**kargs)
+		
 		this._CAP.set(cv2.CAP_PROP_FPS, 9999.9) # > 9000.
 		
 		try: this.getFrame()
@@ -353,6 +357,7 @@ class Camera(object):
 		sumSeuil = kargs.get('sumSeuil', 200)
 		refSeuil = kargs.get('refSeuil', 150)
 		interval = kargs.get('interval', 0)
+		check = kargs.get('check', False)
 		count = kargs.get('count', 1)
 		
 		# Image cumulative
@@ -370,12 +375,14 @@ class Camera(object):
 			current = this._FRAME
 			
 			if i: # Si ce n'est plus la première itération
-			
-				# Détection d'un changement
-				this.detectByRef(seuil=refSeuil, ref=result, frame=current)
-				sum = this.binary.sum()/255
-				if sum > sumSeuil: # Crash
-					raise Exception("Don't interfere with the reference ! (%d)" % sum)
+				
+				if check:
+					# Détection d'un changement
+					this.detectByRef(seuil=refSeuil, ref=result, frame=current)
+					sum = this.binary.sum()/255
+					if sum > sumSeuil: # Crash
+						raise Exception("Don't interfere with the reference ! (%d)" % sum)
+				# END CHECK
 				
 				# Cumulation
 				cumul += current
@@ -434,6 +441,33 @@ class Camera(object):
 	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
+	# On filme tout
+	@staticmethod
+	def getFrames():
+		"""Get frames from all camera"""
+		for cam in Camera.CAMERAS: cam.getFrame()
+	
+	# Si une droite d' est parallèle à une droite d, et une droite d" à la droite d', alors d et d" sont parallèles.
+	@staticmethod
+	def AsyncProcess(**kargs):
+		"""Start image process:
+		"""
+		
+		# Arguments
+		cams = kargs.get('cams', Camera.CAMERAS)
+		func = kargs.get('func', lambda cam: None)
+		
+		threads = []
+		for cam in cams:
+			thread = Thread(target=func, args=(cam,))
+			threads.append(thread)
+			thread.start()
+			
+		# On synchronise
+		for thread in threads: thread.join()
+	
+	# ------------------------------------------------------- # ------------------------------------------------------- #
+	
 	# Pour calibrer la caméra
 	def calibrate(this, display=False): # C'est des maths.
 		"""Sets camera's position according to the space"""
@@ -464,7 +498,7 @@ class Camera(object):
 		except: this._POS = None
 		
 		# Petit affichage oklm
-		if display: print 'Calibration: %f %f %s' % (math.degrees(a), math.degrees(b), this._POS)
+		if display: print 'Calibration: %f %f %s' % (math.degrees(a), math.degrees(b), ~this._POS)
 		return this._POS
 	
 	# Pour obtenir l'angle absolu du doigt par rapport à l'origine
@@ -601,6 +635,36 @@ class Camera(object):
 		# On fait la différence et on extrait les composantes RGB
 		# diff = cv2.absdiff(frame, ref)
 		diff = np.abs(frame.astype(int) - ref.astype(int)).astype(np.uint8)
+		
+		# Petit seuillage des familles
+		this._BINARY = delta = EmptyFrom(diff, 1)
+		delta[:,:] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
+		
+		return {
+			'AbsDiff': diff,
+			'Threshold': delta
+		}
+		
+	# Différence avec pesage de la luminosité
+	def detectByRefAdv(this, **kargs):
+		"""
+		"""
+		
+		# Arguments
+		seuil = kargs.get('seuil', 100)
+		ref = kargs.get('ref', this._REF)
+		frame = kargs.get('frame', this._FRAME)
+		coef = kargs.get('coef', 0.01)
+		
+		# On fait la différence et on extrait les composantes RGB
+		diff = cv2.absdiff(frame, ref)
+		
+		# Zblah
+		img = diff.copy()
+		weight = (cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY) / 255.0 * coef) + 1
+		img[:,:,0] *= weight
+		img[:,:,1] *= weight
+		img[:,:,2] *= weight
 		
 		# Petit seuillage des familles
 		this._BINARY = delta = EmptyFrom(diff, 1)

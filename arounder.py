@@ -5,12 +5,11 @@ width, height = (1280, 720)
 width, height = (640, 480)
 
 # Création de la caméra
-cam = Camera()
+cam = Camera(varThreshold=10)
 cam.init(0, width=width, height=height)
 cam.setFOV(horizontal=math.radians(92.0))
 # cam.setImageVertBand(0.45, 0.5)
 cam.setImageVertBand(0, 0.5)
-
 cam.setAnoisek(radius=3)
 
 mouse.SMOOTH = 5
@@ -22,13 +21,16 @@ while 1:
 	cam.getFrame()
 	
 	# Isolement
-	# r = cam.detectByRef(seuil=30)
+	r = cam.detectByRefAdv(
+		seuil=30,
+		coef=0
+	)
 	
 	# Amélioration:
-	cam.fgMagic()
+	# cam.fgMagic()
 	
 	# Test du anoise
-	cam.anoise(100)
+	cam.anoise(150, 150)
 	
 	# Détection
 	cam.arounder(
@@ -52,9 +54,8 @@ while 1:
 	cam.drawSpace()
 	
 	# Affichage
-	cv2.imshow('source', cam.frame)
+	cv2.imshow('source', cam.stream)
 	cv2.imshow('reference', cam.reference)
-	cv2.imshow('scan', cam.scan)
 	
 	# Input management
 	sKey = Camera.waitKey()
