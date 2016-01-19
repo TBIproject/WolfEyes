@@ -1,0 +1,17 @@
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\WolfEyes.exe.config
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\WolfEyes.exe
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\WolfEyes.pdb
+R:\Estelol\cs\WolfEyes\WolfEyes\obj\Debug\WolfEyes.csprojResolveAssemblyReference.cache
+R:\Estelol\cs\WolfEyes\WolfEyes\obj\Debug\WolfEyes.Properties.Resources.resources
+R:\Estelol\cs\WolfEyes\WolfEyes\obj\Debug\WolfEyes.csproj.GenerateResource.Cache
+R:\Estelol\cs\WolfEyes\WolfEyes\obj\Debug\WolfEyes.exe
+R:\Estelol\cs\WolfEyes\WolfEyes\obj\Debug\WolfEyes.pdb
+R:\Estelol\cs\WolfEyes\WolfEyes\obj\Debug\WolfEyes.frmMain.resources
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\Emgu.CV.dll
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\Emgu.CV.UI.dll
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\Emgu.Util.dll
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\ZedGraph.dll
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\Emgu.CV.xml
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\Emgu.CV.UI.xml
+R:\Estelol\cs\WolfEyes\WolfEyes\bin\Debug\Emgu.Util.xml
+R:\Estelol\cs\WolfEyes\WolfEyes\obj\Debug\WolfEyes.FrmWizard.resources
