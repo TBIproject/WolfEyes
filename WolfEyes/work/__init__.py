@@ -11,6 +11,7 @@ sys.stdout = NUL
 
 # Importations
 from .. import MouseControl
+from .. import CustomFilter
 from ..camera import Space, Camera
 from ..D2Point import D2Point
 from ..tbiTools import *
@@ -22,6 +23,7 @@ import cv2
 
 # Raccourcis
 np = numpy
+cf = CustomFilter
 mouse = MouseControl
 
 # On remet comme รงa va bien

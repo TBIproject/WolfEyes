@@ -47,7 +47,8 @@ class Camera(object):
 	# Temporisation
 	@staticmethod
 	def waitKey(t=1):
-		return cv2.waitKey(t) & 0xFF
+		k = cv2.waitKey(t) & 0xFF
+		return k
 	
 	# Liste des caméras
 	CAMERAS = set()
@@ -345,7 +346,7 @@ class Camera(object):
 		# On doit reset ou pas ?
 		if not noReset: this.resetBin()
 		return ret
-		
+	
 	# On stocke l'image de référence
 	def setReference(this, **kargs):
 		"""Save frame as reference
@@ -554,6 +555,19 @@ class Camera(object):
 		
 	# Simplification (cam1 % cam2)
 	def __mod__(this, cam): return this.fingerPosition(cam)
+	
+	# ------------------------------------------------------- # ------------------------------------------------------- #
+	
+	def equalize(this, **kargs):
+		frame = this._FRAME
+		
+		for i in xrange(3):
+			
+			hist = cv2.calcHist([frame], [i], None, [256], [0, 256])[:]
+			min, max = hist.argmin(), hist.argmax()
+			
+			c = frame[:, :, i]
+			c[:,:] = ((c - min) / (max - min) * 255).astype(np.uint8)
 	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	

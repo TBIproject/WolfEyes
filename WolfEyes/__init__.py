@@ -1,1 +1,1 @@
-__all__ = ['camera', 'D2Point', 'tbiTools', 'pyon', 'MouseControl']
+__all__ = ['camera', 'D2Point', 'tbiTools', 'pyon', 'MouseControl', 'CustomFilter']

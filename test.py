@@ -19,15 +19,35 @@ cam.setReference(count=10)
 while 1:
 	# On filme
 	cam.getFrame()
+	# cam.equalize();
 	
 	diff = cv2.absdiff(cam.frame, cam.reference)
+	hist = histogram(cam.frame)
+	
+	b = cam.frame[:,:,0]
+	g = cam.frame[:,:,1]
+	r = cam.frame[:,:,2]
+	
+	hb = histogram(b)
+	hg = histogram(g)
+	hr = histogram(r)
+	
+	bg = cv2.medianBlur(g, 3)
+	# dg = cv2.Sobel(cam.frame, cv2.CV_64F, 1, 1, ksize=-1)
+	dg = cf.Scharr(cam.frame, 1)
+	bb = cv2.GaussianBlur(b, (5, 5), 1)
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)
-	cv2.imshow('reference', cam.reference)
-	cv2.imshow('diff', diff)
-	
-	
+	# cv2.imshow('reference', cam.reference)
+	# cv2.imshow('diff', diff)
+	cv2.imshow('qzdqzdqzd', hist)
+	# cv2.imshow('r', r)
+	cv2.imshow('g', g)
+	# cv2.imshow('b', b)
+	cv2.imshow('bg', bg)
+	# cv2.imshow('bb', bb)
+	cv2.imshow('dg', dg)
 	
 	# Input management
 	sKey = Camera.waitKey()
