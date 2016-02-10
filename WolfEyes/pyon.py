@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Flexible json-like dict"""
 import json
 
 class pyon(dict):

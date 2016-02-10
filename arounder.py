@@ -54,7 +54,8 @@ while 1:
 	cam.drawSpace()
 	
 	# Affichage
-	cv2.imshow('source', cam.stream)
+	cv2.imshow('source', cam.frame)
+	cv2.imshow('copmlexe', cam.stream)
 	cv2.imshow('reference', cam.reference)
 	
 	# Input management

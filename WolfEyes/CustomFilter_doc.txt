@@ -1,0 +1,29 @@
+Help on module CustomFilter:
+
+NAME
+    CustomFilter - Curstom filter library
+
+FILE
+    b:\popolopo\__git\wolfeyepython\wolfeyes\customfilter.py
+
+FUNCTIONS
+    Deriv(img, kx=None, ky=None, dt=1)
+        # Custom pseudo-derivation method
+    
+    Gamma(img, gamma=1)
+    
+    Gamma2(img, gamma=1)
+    
+    Laplacian(img)
+    
+    Scharr(img, dt=1)
+
+DATA
+    ScharrX = array([[  3,   0,  -3],
+           [ 10,   0, -10],
+           [  3,...
+    ScharrY = array([[  3,  10,   3],
+           [  0,   0,   0],
+           [ -3,...
+
+

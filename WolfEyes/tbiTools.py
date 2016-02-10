@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-*
+"""Tools for everyday tasks"""
 from D2Point import *
 import numpy as np
 import cv2
@@ -6,17 +7,28 @@ import sys
 
 # PRINTF!!
 def printf(txt):
+	"""No line feed at the end ! :D"""
 	sys.stdout.write(txt)
 
 # Dimensions d'une matrice (image)
-def height(img): return np.shape(img)[0]
-def width(img): return np.shape(img)[1]
+def height(img):
+	"""Get an image's height"""
+	return np.shape(img)[0]
+	
+def width(img):
+	"""Get an image's width"""
+	return np.shape(img)[1]
+	
 def channels(img):
+	"""List an image's channels"""
 	shape = np.shape(img)
 	return shape[2] if len(shape) > 2 else 1
 
 # Constrain
 def constrain(min, max, *args):
+	"""Constrain a value between min and max
+	 syntax: constrain(min, max, value1, value2, value3, ...)
+	         constrain(min, max, *arglist)"""
 	result = []
 	for n in args: result.append(min if n < min else max if n > max else n)
 	if len(args) == 1: return result[0]
@@ -24,6 +36,10 @@ def constrain(min, max, *args):
 	
 # Image vide (easypeasy)
 def Empty(**kargs):
+	"""Creates an empty image from some inputs:
+	 - channels: number of channels (3)
+	 - height (1)
+	 - width (1)"""
 	channels = kargs.get('channels', 3)
 	height = kargs.get('height', 1)
 	width = kargs.get('width', 1)
@@ -31,11 +47,13 @@ def Empty(**kargs):
 	
 # Image vide depuis une autre image
 def EmptyFrom(img, chan=None):
+	"""Creates an empty image from another (same size, uint8)"""
 	if not chan: chan = channels(img)
 	return Empty(height=height(img), width=width(img), channels=chan)
 	
 # Retourne la liste des maximums d'un contour
 def limiter(contour, maxDist=0):
+	"""Returns every extrem-bottom points from a contour"""
 	cnt = contour.copy()
 	initial = start = end = None
 	
@@ -97,6 +115,8 @@ def anoisek(r=5, debug=False):
 
 # Création d'une image à partir d'un histogramme
 def histogram(img, gamma=0.3):
+	"""Creates an image's histogram to display"""
+	
 	shape = img.shape
 	cans = shape[2] if len(shape) > 2 else 1
 	result = np.zeros((256, 256, cans), np.uint8)

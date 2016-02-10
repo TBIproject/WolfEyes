@@ -1,0 +1,45 @@
+Help on module tbiTools:
+
+NAME
+    tbiTools - Tools for everyday tasks
+
+FILE
+    b:\popolopo\__git\wolfeyepython\wolfeyes\tbitools.py
+
+FUNCTIONS
+    Empty(**kargs)
+        Creates an empty image from some inputs:
+        - channels: number of channels (3)
+        - height (1)
+        - width (1)
+    
+    EmptyFrom(img, chan=None)
+        Creates an empty image from another (same size, uint8)
+    
+    anoisek(r=5, debug=False)
+        Function to create a kernel for anti-noise purposes
+    
+    channels(img)
+        List an image's channels
+    
+    constrain(min, max, *args)
+        Constrain a value between min and max
+        syntax: constrain(min, max, value1, value2, value3, ...)
+                constrain(min, max, *arglist)
+    
+    height(img)
+        Get an image's height
+    
+    histogram(img, gamma=0.3)
+        Creates an image's histogram to display
+    
+    limiter(contour, maxDist=0)
+        Returns every extrem-bottom points from a contour
+    
+    printf(txt)
+        No line feed at the end ! :D
+    
+    width(img)
+        Get an image's width
+
+

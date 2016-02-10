@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""Easy mouse controller"""
+
 from pymouse import PyMouse
 from D2Point import *
 
@@ -20,10 +22,12 @@ DRAG = False
 SMOOTH = 1
 
 def position():
+	"""Return current mouse's position"""
 	return D2Point(*PYMOUSE.position())
 ###
 
 def smoothed(x, y):
+	"""Return smoothed position depending on mouse current pos"""
 	pos = position()
 	vect = D2Point(x, y) - pos
 	vect.length = vect.length/SMOOTH
@@ -31,26 +35,33 @@ def smoothed(x, y):
 ###
 
 def click(x, y, b=LEFT):
+	"""Click with mouse's button 'b'"""
 	x, y = ~smoothed(x, y).int
 	PYMOUSE.click(x, y, b)
 ###	
 
 def mouse_down(x, y, b=LEFT):
+	"""Press down mouse's button 'b'"""
 	x, y = ~smoothed(x, y).int
 	PYMOUSE.press(x, y, b)
 ###
 
 def mouse_up(x, y, b=LEFT):
+	"""Release up mouse's button 'b'"""
 	x, y = ~smoothed(x, y).int
 	PYMOUSE.release(x, y, b)
 ###
 
 def move(x, y):
+	"""Move mouse according to smoothing"""
 	x, y = ~smoothed(x, y).int
 	PYMOUSE.move(int(x), int(y))
 ###
 
 def drag(click, x, y):
+	"""Memorize mouse click up/down and drags stuff
+	 - click: is the user still clicking ?
+	"""
 	x, y = ~smoothed(x, y).int
 	if DRAG: # Si on est en train de glisser
 		

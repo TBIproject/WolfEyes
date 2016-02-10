@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Custom weird vector, very useful."""
 import math
 
 # Plus simple pour gérer les points/vecteurs 2d
@@ -65,8 +66,13 @@ class D2Point(object):
 	def __neg__(this): return D2Point(-this.x, -this.y)
 	
 	# Clone (+D2Point)
-	def __pos__(this): return D2Point(this.x, this.y)
-	def clone(this): return +this
+	def __pos__(this):
+		"""'+this' : clones itself"""
+		return D2Point(this.x, this.y)
+		
+	def clone(this):
+		"""Returns a new vector with same coords as current"""
+		return +this
 	
 	# Module/Taille
 	def __abs__(this): return math.sqrt(this.x**2 + this.y**2)
@@ -85,11 +91,15 @@ class D2Point(object):
 	
 	# Partie entière
 	@property
-	def int(this): return D2Point(int(this.x), int(this.y))
+	def int(this):
+		"""Returns new vector as current with integer coordinates"""
+		return D2Point(int(this.x), int(this.y))
 	
 	# Conversion en tuple (~D2Point)
 	def __invert__(this): return (this.x, this.y)
-	def tuple(this): return ~this
+	def tuple(this):
+		"""Returns current as a tuple"""
+		return ~this
 		
 	# Modulation/moyenne (a % b)
 	def __mod__(this, m):
@@ -101,22 +111,27 @@ class D2Point(object):
 	
 	# Vecteur unitaire
 	@property
-	def unit(this): return this % 1
+	def unit(this):
+		"""Returns unitary vector from current"""
+		return this % 1
 	
 	# Pente/Direction
 	@property
 	def slope(this):
+		"""Gets vector slope from direction"""
 		try: return this.y / this.x
 		except: return None
 	
 	# Direction (angle)
 	@property
 	def direction(this):
+		"""Gets current vector direction (radians)"""
 		return math.atan(this.slope)
 	
 	# Changement de direction
 	@direction.setter
 	def direction(this, rad):
+		"""Sets the current vector direction to 'rad' (radians)"""
 		length = this.length
 		dir = D2Point.createUnit(rad)
 		this.x = dir.x * length
@@ -125,20 +140,24 @@ class D2Point(object):
 	# Easy Degrees
 	@property
 	def directionDeg(this):
+		"""Gets current vector direction (degrees)"""
 		return math.degrees(this.direction)
 	
 	# Création de vecteurs unitaires
 	@staticmethod
 	def createUnit(rad=0):
+		"""Static method returning some unit vector from a given direction 'rad' (radians)"""
 		return D2Point(math.cos(rad), math.sin(rad))
 		
 	# Easy Degrees
 	@staticmethod
 	def createUnitDeg(deg=0):
+		"""Static method returning some unit vector from a given direction 'deg' (degrees)"""
 		return D2Point.createUnit(math.radians(deg))
 	
 	# Rotation du vecteur
 	def rotate(this, rad):
+		"""Returns a new vector being the current rotated by 'rad' (radians)"""
 		z = complex(this.x, this.y)
 		u = D2Point.createUnit(rad)
 		c = complex(u.x, u.y)
@@ -147,6 +166,7 @@ class D2Point(object):
 	
 	# Easy Degrees
 	def rotateDeg(this, deg):
+		"""Returns a new vector being the current rotated by 'deg' (degrees)"""
 		return this.rotate(math.radians(deg))
 	
 	# Réaction à "not this"

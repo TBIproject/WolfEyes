@@ -36,12 +36,16 @@ while 1:
 	# dg = cv2.Sobel(cam.frame, cv2.CV_64F, 1, 1, ksize=-1)
 	dg = cf.Scharr(cam.frame, 1)
 	bb = cv2.GaussianBlur(b, (5, 5), 1)
+	lapl = cf.Laplacian(cam.frame)
+	
+	# dg = ((dg > 32) * 255).astype(np.uint8)
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)
 	# cv2.imshow('reference', cam.reference)
 	# cv2.imshow('diff', diff)
 	cv2.imshow('qzdqzdqzd', hist)
+	cv2.imshow('Laplacian', lapl)
 	# cv2.imshow('r', r)
 	cv2.imshow('g', g)
 	# cv2.imshow('b', b)

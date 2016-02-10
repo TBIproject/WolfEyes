@@ -1,0 +1,290 @@
+Help on module camera:
+
+NAME
+    camera
+
+FILE
+    b:\popolopo\__git\wolfeyepython\wolfeyes\camera.py
+
+DESCRIPTION
+    AUTHOR(S): POPOLO, 
+    REQUIRE PYTHON 2.7x
+    REQUIRE CV2 3.x
+    NOTE: ON MESURE LES ANGLES DE DROITE A GAUCHE!
+    NOTE: ON UTILISE LES ANGLES EN RADIANS!
+    ON NE DIT PAS 'CANARD'!
+
+CLASSES
+    __builtin__.object
+        Camera
+        Space
+    
+    class Camera(__builtin__.object)
+     |  Class helping with cameras and OpenCV (still brain fucked)
+     |  
+     |  Methods defined here:
+     |  
+     |  __del__(this)
+     |      Destructor (del this)
+     |  
+     |  __init__(this, **kargs)
+     |      Constructor
+     |  
+     |  __mod__(this, cam)
+     |      # Simplification (cam1 % cam2)
+     |  
+     |  anoise(this, *args, **kargs)
+     |      Tries to denoise the binary output
+     |      ! You need to call 'this.anoisek' !
+     |  
+     |  arounder(this, **kargs)
+     |      Function making use of OpenCV's contours.
+     |      - maxCount: Maximum number of contours to process
+     |      - minArea: Minimum area to look for
+     |      - maxArea: Maximum area to look for
+     |      - ignore: Painting color for ignored contours
+     |      - color: Painting color for accepted contours
+     |      - thick: Lines thickness
+     |  
+     |  blober(this, **kargs)
+     |      Blob detection
+     |      C'est de la merde en vrai
+     |       - Arg:
+     |  
+     |  calibrate(this, display=False)
+     |      Sets camera's position according to the space
+     |  
+     |  checkInit(this)
+     |      Crash if not capturing
+     |  
+     |  config(this, **kargs)
+     |      Camera's configuration:
+     |      - exposure: value < 0, brigther towards 0
+     |      - height: camera's capture height
+     |      - width: camera's capture width
+     |      - fps: camera's frenquency
+     |  
+     |  detectByColor(this, **kargs)
+     |      Color thresholding:
+     |      - hueLowMin: 
+     |      - hueLowMax: 
+     |      - hueHighMin: 
+     |      - seuil: 
+     |      - blur: Blur the result image
+     |  
+     |  detectByRef(this, **kargs)
+     |      Reference/difference thresholding:
+     |      - seuil: threshold on the sum of the absolute difference of pixels between images
+     |  
+     |  detectByRefAdv(this, **kargs)
+     |  
+     |  detectHybrid(this, **kargs)
+     |      Hybrid thresholding:
+     |      - hueLowMin: 
+     |      - hueLowMax: 
+     |      - hueHighMin: 
+     |      - seuilColor: 
+     |      - seuilDiff:
+     |  
+     |  drawSpace(this, **kargs)
+     |      Call me maybe
+     |  
+     |  equalize(this, **kargs)
+     |  
+     |  fgCompensate(this, **kargs)
+     |      Apply logical 'or' to the original detection and foreground mask
+     |  
+     |  fgExtract(this, **kargs)
+     |      Isolate the foreground
+     |  
+     |  fgMagic(this, **kargs)
+     |      Simplifaction, do the followings:
+     |      * fgExtract
+     |      * fgCompensate
+     |  
+     |  fingerPosition(this, cam)
+     |      Return's finger position depending on the two camera's data
+     |      Return values:
+     |       - click (bool)
+     |       - position (D2Point)
+     |  
+     |  getFrame(this, error=3, **kargs)
+     |      Frame retreiving and formatting
+     |      - noReset: do not reset binary image (True/False)
+     |      - error: times to tryhard
+     |  
+     |  getModes(this)
+     |      Tries to list availables modes for the webcam
+     |  
+     |  getProp(this, prop)
+     |      Getting camera's property
+     |  
+     |  grabDetected(this)
+     |      Read and erase last finger position
+     |  
+     |  init(this, id, **kargs)
+     |      Capture and camera initialisation
+     |  
+     |  isInit(this)
+     |      Is the device capturing ?
+     |  
+     |  morph_closing(this, **kargs)
+     |  
+     |  morph_opening(this, **kargs)
+     |  
+     |  release(this)
+     |      Stop capturing
+     |  
+     |  resetBin(this)
+     |      Reset the binary image
+     |  
+     |  saber(this, **kargs)
+     |      Vertical object detection:
+     |      Slice vertically and mesures height
+     |       - threshold: (the minimum height of an object
+     |              x =< 1: Relative to image height
+     |              x > 1: Pixels
+     |  
+     |  setAnoisek(this, **kargs)
+     |      Creates the kernel for de-noising
+     |      - radius: kernel's radius
+     |  
+     |  setBloberUp(this, **kargs)
+     |      Set every parameter for the blob detection 
+     |      - min/maxThresh: Threshold to apply (erm)
+     |      - Area: Filter by area (True/False)
+     |      - min/maxArea: Obvious.
+     |      - Circularity: Filter by circularity (True/False)
+     |      - min/maxCircularity: [0,1]
+     |      - Convexity: Filter by convexity (True/False)
+     |      - min/maxConvexity: [0,1]
+     |      - Inertia: Filter by inertia (True/False)
+     |      - min/maxInertia: [0,1]
+     |      - minDist: minimal distance between blobs
+     |  
+     |  setBlurSize(this, size)
+     |      Set blur kernel, number of pixels around to average
+     |  
+     |  setFOV(this, **kargs)
+     |      Camera's field of view (radians!):
+     |      - horizontal: obvious
+     |      - vertical: seriously ?
+     |  
+     |  setImageVertBand(this, a=0, b=1, r=1)
+     |      When capturing a frame, cutting a chunk of the image:
+     |      (from top to bottom)
+     |       - a: top limit [0;1]
+     |       - b: bottom limit [0;1]
+     |       - r: pixel jump (int)
+     |  
+     |  setProp(this, prop, value)
+     |      Setting camera's property
+     |  
+     |  setReference(this, **kargs)
+     |      Save frame as reference
+     |      - interval: time between takes (ms)
+     |      - count: number of frame to take
+     |  
+     |  skywalker(this, **kargs)
+     |      Object detection in binary image by straight cut
+     |      Allow cutting for a bit through void:
+     |       - offshore: distance allowed in the void to look
+     |       - minSize: (the minimum size of an object)
+     |              x < 1: Relative to image width
+     |              x > 1: Pixels
+     |       - bin: binary image to parse (3 channel matrix)
+     |       - blur: add blur on 'bin' ? (bool)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  AsyncProcess(**kargs)
+     |      Start image process:
+     |  
+     |  closeCamApp()
+     |      Stop capturing and destroy cv2 windows
+     |  
+     |  getFrames()
+     |      Get frames from all camera
+     |  
+     |  releaseAll()
+     |      Stop evrything
+     |  
+     |  waitKey(t=1)
+     |      # Temporisation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  binary
+     |      Thresholded image (black/white, 3 channels)
+     |  
+     |  capture
+     |  
+     |  clic
+     |      Detected virtual click
+     |  
+     |  exposure
+     |  
+     |  finger
+     |      Detected finger position
+     |  
+     |  fingerAbsoluteAngle
+     |      Finger's absolute angle relative to the space
+     |  
+     |  fov
+     |  
+     |  fps
+     |  
+     |  frame
+     |      Last captured image
+     |  
+     |  height
+     |  
+     |  position
+     |  
+     |  reference
+     |      Reference image
+     |  
+     |  scan
+     |      Scanned image (often from 'binary')
+     |  
+     |  space
+     |  
+     |  stream
+     |      Displays the scan and the current frame
+     |  
+     |  width
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  CAMERAS = set([])
+     |  
+     |  formats = set([(320, 240), (320, 480), (640, 480), (800, 600), (800, 7...
+     |  
+     |  props = {'exposure': 15, 'fps': 5, 'height': 4, 'width': 3}
+    
+    class Space(__builtin__.object)
+     |  # Gestion du repère, en mesure d'angles relatifs
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(this, o=0, i=0, j=0)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+
