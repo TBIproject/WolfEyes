@@ -22,8 +22,8 @@ while 1:
 	
 	# Isolement
 	r = cam.detectByRefAdv(
-		seuil=30,
-		coef=0
+		seuil=60,
+		coef=-1
 	)
 	
 	# Amélioration:
@@ -57,6 +57,7 @@ while 1:
 	cv2.imshow('source', cam.frame)
 	cv2.imshow('copmlexe', cam.stream)
 	cv2.imshow('reference', cam.reference)
+	for name, img in r.iteritems(): cv2.imshow(name, img)
 	
 	# Input management
 	sKey = Camera.waitKey()

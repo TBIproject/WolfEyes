@@ -664,31 +664,33 @@ class Camera(object):
 		
 	# Différence avec pesage de la luminosité
 	def detectByRefAdv(this, **kargs):
-		"""
+		"""Tryies to weight difference by looking at the reference intensities (per pixel)
 		"""
 		
 		# Arguments
 		seuil = kargs.get('seuil', 100)
 		ref = kargs.get('ref', this._REF)
 		frame = kargs.get('frame', this._FRAME)
-		coef = kargs.get('coef', 0.01)
+		coef = kargs.get('coef', 1)
 		
 		# On fait la différence et on extrait les composantes RGB
 		diff = cv2.absdiff(frame, ref)
 		
 		# Zblah
-		img = diff.copy()
-		weight = (cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY) / 255.0 * coef) + 1
-		img[:,:,0] *= weight
-		img[:,:,1] *= weight
-		img[:,:,2] *= weight
+		sat = diff.copy()
+		weight = 1 + (cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY) / 255.0) * coef
+		sat[:,:,0] *= weight
+		sat[:,:,1] *= weight
+		sat[:,:,2] *= weight
 		
 		# Petit seuillage des familles
-		this._BINARY = delta = EmptyFrom(diff, 1)
-		delta[:,:] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
+		this._BINARY = delta = EmptyFrom(sat, 1)
+		delta[:,:] = ((sat[:,:,2] + sat[:,:,1] + sat[:,:,0]) > seuil) * 255
 		
 		return {
 			'AbsDiff': diff,
+			'Weight': weight % 1,
+			'Weighted': sat,
 			'Threshold': delta
 		}
 		

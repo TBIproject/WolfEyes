@@ -135,3 +135,58 @@ def histogram(img, gamma=0.3):
 	
 	# RETURN
 	return result
+	
+# Essaye de supprimer le décalage absolu
+def grounder(img):
+	"""Tries to remove absolute offset
+	'img' must be a 3 colors image"""
+	shape = img.shape
+	
+	# Mise en forme
+	a = img.reshape((shape[0] * shape[1], 3))
+	min = np.zeros(a.shape)
+	max = np.zeros(a.shape)
+	
+	# Minimas/maximas
+	min[:,0] = min[:,1] = min[:,2] = a.min(axis=1)
+	max[:,0] = max[:,1] = max[:,2] = a.max(axis=1)
+	
+	# Remise en forme
+	min = min.reshape(shape)
+	max = max.reshape(shape)
+	
+	# Remise au ras du sol
+	grounded = img - min
+	
+	# return (grounded / max).astype(np.float32)
+	return (grounded / 255.0).astype(np.float32)
+	
+# Objet pour retourner des trucs
+class Statos:
+	"""Gets a flow of image and creates some stats"""
+	
+	# Init <3
+	def __init__(this, **kargs):
+		this.count = kargs.get('count', 10)
+	
+	def reset(this):
+		this.__i = 0
+		this.mean = None
+		this.var = None
+	
+	@property
+	def count(this): return this.__count
+	
+	@count.setter
+	def count(this, value):
+		this.reset()
+		return this.__count = 0 if value < 0 else value
+	
+	# Miam
+	def feed(this, img):
+		if this.mean is None:
+			this.mean = np.zeros(img.shape), np.uint32)
+		if this.var is None:
+			this.var = np.zeros(img.shape, np.uint8)
+		
+		this.mean += img
