@@ -4,7 +4,7 @@ NAME
     camera
 
 FILE
-    b:\popolopo\__git\wolfeyepython\wolfeyes\camera.py
+    b:\popolopo\__git (work)\wolfeyepython\wolfeyes\camera.py
 
 DESCRIPTION
     AUTHOR(S): POPOLO, 
@@ -77,6 +77,7 @@ CLASSES
      |      - seuil: threshold on the sum of the absolute difference of pixels between images
      |  
      |  detectByRefAdv(this, **kargs)
+     |      Tryies to weight difference by looking at the reference intensities (per pixel)
      |  
      |  detectHybrid(this, **kargs)
      |      Hybrid thresholding:

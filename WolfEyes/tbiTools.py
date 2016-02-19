@@ -25,14 +25,14 @@ def channels(img):
 	return shape[2] if len(shape) > 2 else 1
 
 # Constrain
-def constrain(min, max, *args):
+def constrain(n, min, max): return min if n < min else max if n > max else n
+def Constrain(min, max, *args):
 	"""Constrain a value between min and max
 	 syntax: constrain(min, max, value1, value2, value3, ...)
 	         constrain(min, max, *arglist)"""
 	result = []
-	for n in args: result.append(min if n < min else max if n > max else n)
-	if len(args) == 1: return result[0]
-	else: return tuple(result)
+	for n in args: result.append(constrain(n, min, max))
+	return tuple(result)
 	
 # Image vide (easypeasy)
 def Empty(**kargs):
@@ -160,6 +160,10 @@ def grounder(img):
 	
 	# return (grounded / max).astype(np.float32)
 	return (grounded / 255.0).astype(np.float32)
+
+def rgbsum(img):
+	img = img.astype(np.uint16)
+	return img[:,:,0] + img[:,:,1] + img[:,:,2]
 	
 # Objet pour retourner des trucs
 class Statos:
@@ -167,26 +171,52 @@ class Statos:
 	
 	# Init <3
 	def __init__(this, **kargs):
-		this.count = kargs.get('count', 10)
+		this.setcount(kargs.get('count', 10))
 	
 	def reset(this):
+		this.DONE = False
 		this.__i = 0
-		this.mean = None
-		this.var = None
+		this.__j = 0
+		this._mean = None
+		this._max = None
+		this._var = None
+	
+	def setcount(this, value):
+		this.reset() # 16777216 = 2^32 / 256
+		this.__count = constrain(value, 0, 16777216)
+		return this.__count
 	
 	@property
 	def count(this): return this.__count
 	
 	@count.setter
-	def count(this, value):
-		this.reset()
-		return this.__count = 0 if value < 0 else value
+	def count(this, value): return this.setcount(value)
+		
+	@property
+	def i(this): return this.__i
+	@property
+	def j(this): return this.__j
+	
+	@property
+	def mean(this): return (this._mean / this.i).astype(np.uint8)
 	
 	# Miam
 	def feed(this, img):
-		if this.mean is None:
-			this.mean = np.zeros(img.shape), np.uint32)
-		if this.var is None:
-			this.var = np.zeros(img.shape, np.uint8)
+		if this._mean is None:
+			this._mean = np.zeros(img.shape, np.uint32)
+		if this._max is None:
+			this._max = np.zeros(img.shape, np.uint8)
+		if this._var is None:
+			this._var = np.zeros(img.shape, np.uint8)
 		
-		this.mean += img
+		if this.i < this.count:
+			this._mean += img
+			this.__i += 1
+		elif this.j < this.count*2:
+			diff = cv2.absdiff(this.mean, img)
+			this._max = np.maximum(this._max, diff)
+			this.__j += 1
+		else: this.DONE = True
+		
+		return this._max
+### END STATOS

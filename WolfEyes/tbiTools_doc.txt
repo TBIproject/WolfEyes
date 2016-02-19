@@ -4,9 +4,43 @@ NAME
     tbiTools - Tools for everyday tasks
 
 FILE
-    b:\popolopo\__git\wolfeyepython\wolfeyes\tbitools.py
+    b:\popolopo\__git (work)\wolfeyepython\wolfeyes\tbitools.py
+
+CLASSES
+    Statos
+    
+    class Statos
+     |  Gets a flow of image and creates some stats
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(this, **kargs)
+     |      # Init <3
+     |  
+     |  feed(this, img)
+     |      # Miam
+     |  
+     |  reset(this)
+     |  
+     |  setcount(this, value)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  count
+     |  
+     |  i
+     |  
+     |  j
+     |  
+     |  mean
 
 FUNCTIONS
+    Constrain(min, max, *args)
+        Constrain a value between min and max
+        syntax: constrain(min, max, value1, value2, value3, ...)
+                constrain(min, max, *arglist)
+    
     Empty(**kargs)
         Creates an empty image from some inputs:
         - channels: number of channels (3)
@@ -22,10 +56,12 @@ FUNCTIONS
     channels(img)
         List an image's channels
     
-    constrain(min, max, *args)
-        Constrain a value between min and max
-        syntax: constrain(min, max, value1, value2, value3, ...)
-                constrain(min, max, *arglist)
+    constrain(n, min, max)
+        # Constrain
+    
+    grounder(img)
+        Tries to remove absolute offset
+        'img' must be a 3 colors image
     
     height(img)
         Get an image's height
@@ -38,6 +74,8 @@ FUNCTIONS
     
     printf(txt)
         No line feed at the end ! :D
+    
+    rgbsum(img)
     
     width(img)
         Get an image's width
