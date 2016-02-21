@@ -10,7 +10,7 @@ min_palm_roi = [50, 50]
 
 # Création de la caméra
 cam = Camera()
-cam.init(0, width=W, height=H, exposure=-6)
+cam.init(0, width=W, height=H, exposure=-10)
 cam.setFOV(horizontal=math.radians(92.0))
 
 print 'looping...'

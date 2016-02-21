@@ -135,13 +135,21 @@ def histogram(img, gamma=0.3):
 	
 	# RETURN
 	return result
-	
+
+def coloroffset(img):
+	min = img.min(axis=2)
+	off = np.zeros(img.shape, img.dtype)
+	if len(off.shape) > 2:
+		for i in xrange(off.shape[2]): off[:,:,i] = min
+	return off
+
 # Essaye de supprimer le décalage absolu
-def grounder(img):
+def grounder(img, dtype=None):
 	"""Tries to remove absolute offset
 	'img' must be a 3 colors image"""
 	shape = img.shape
 	
+	"""
 	# Mise en forme
 	a = img.reshape((shape[0] * shape[1], 3))
 	min = np.zeros(a.shape)
@@ -160,10 +168,17 @@ def grounder(img):
 	
 	# return (grounded / max).astype(np.float32)
 	return (grounded / 255.0).astype(np.float32)
+	"""#"""
+	
+	min = coloroffset(img)
+	grounded = img - min
+	if dtype is not None:
+		grounded = grouded.astype(dtype)
+	
+	return grounded
 
 def rgbsum(img):
-	img = img.astype(np.uint16)
-	return img[:,:,0] + img[:,:,1] + img[:,:,2]
+	return img.sum(axis=2)
 	
 # Objet pour retourner des trucs
 class Statos:
@@ -198,7 +213,10 @@ class Statos:
 	def j(this): return this.__j
 	
 	@property
-	def mean(this): return (this._mean / this.i).astype(np.uint8)
+	def mean(this):
+		if this._mean is not None:
+			return (this._mean / this.i).astype(np.uint8)
+		else: return None
 	
 	# Miam
 	def feed(this, img):
