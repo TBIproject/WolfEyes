@@ -16,7 +16,6 @@ mouse.SMOOTH = 5
 stats = Statos(count=50)
 
 print 'looping...'
-cam.setReference(count=10)
 while 1:
 	# On filme
 	cam.getFrame()
@@ -30,7 +29,7 @@ while 1:
 		cv2.imshow('max', max)
 		
 		diff = cv2.absdiff(stats.mean, cam.frame)
-		ok = diff.sum(axis=2) >= max.sum(axis=2)+1
+		ok = diff.sum(axis=2) > max.sum(axis=2)
 		
 		cv2.imshow('diff', diff)
 		cv2.imshow('thresh', (ok * 255).astype(np.uint8))

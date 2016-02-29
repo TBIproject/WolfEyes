@@ -198,14 +198,22 @@ class Statos:
 	
 	def setcount(this, value):
 		this.reset() # 16777216 = 2^32 / 256
-		this.__count = constrain(value, 0, 16777216)
-		return this.__count
+		val = constrain(value, 0, 16777216)
+		this.__meanCount = val
+		this.__maxCount = val
+		return this.__meanCount
 	
 	@property
-	def count(this): return this.__count
+	def meanCount(this): return this.__meanCount
 	
-	@count.setter
-	def count(this, value): return this.setcount(value)
+	@meanCount.setter
+	def meanCount(this, value): return this.setcount(value)
+	
+	@property
+	def maxCount(this): return this.__maxCount
+	
+	@maxCount.setter
+	def maxCount(this, value): this.__maxCount = value
 		
 	@property
 	def i(this): return this.__i
@@ -227,10 +235,10 @@ class Statos:
 		if this._var is None:
 			this._var = np.zeros(img.shape, np.uint8)
 		
-		if this.i < this.count:
+		if this.i < this.meanCount:
 			this._mean += img
 			this.__i += 1
-		elif this.j < this.count*2:
+		elif this.j < this.maxCount:
 			diff = cv2.absdiff(this.mean, img)
 			this._max = np.maximum(this._max, diff)
 			this.__j += 1

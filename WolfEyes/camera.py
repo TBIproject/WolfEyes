@@ -818,11 +818,11 @@ class Camera(object):
 	# Truc de ouf
 	def anoise(this, *args, **kargs):
 		"""Tries to denoise the binary output
-		 ! You need to call 'this.anoisek' !
+		 ! You need to call 'this.setAnoisek' !
 		"""
 		
 		# Arguments
-		if not args: args = [100]
+		if not args: args = [50]
 		
 		# Kernel's retrieval
 		anoisek = this._ANOISEK
@@ -831,7 +831,7 @@ class Camera(object):
 		# More magic
 		bin = this._BINARY
 		for thresh in args:
-			bin[:,:] = (cv2.filter2D(bin, -1, anoisek) > thresh) * 255
+			bin[:,:] = (cv2.filter2D(bin, -1, anoisek) / 2.55 > thresh) * 255
 		return True
 	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
