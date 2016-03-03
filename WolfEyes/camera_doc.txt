@@ -4,7 +4,7 @@ NAME
     camera
 
 FILE
-    b:\popolopo\__git (work)\wolfeyepython\wolfeyes\camera.py
+    c:\users\vivancoe\desktop\wolfeyes\wolfeyes\camera.py
 
 DESCRIPTION
     AUTHOR(S): POPOLO, 
@@ -24,6 +24,10 @@ CLASSES
      |  
      |  Methods defined here:
      |  
+     |  Export(this, name)
+     |  
+     |  Import(this, name)
+     |  
      |  __del__(this)
      |      Destructor (del this)
      |  
@@ -35,7 +39,7 @@ CLASSES
      |  
      |  anoise(this, *args, **kargs)
      |      Tries to denoise the binary output
-     |      ! You need to call 'this.anoisek' !
+     |      ! You need to call 'this.setAnoisek' !
      |  
      |  arounder(this, **kargs)
      |      Function making use of OpenCV's contours.
@@ -45,11 +49,6 @@ CLASSES
      |      - ignore: Painting color for ignored contours
      |      - color: Painting color for accepted contours
      |      - thick: Lines thickness
-     |  
-     |  blober(this, **kargs)
-     |      Blob detection
-     |      C'est de la merde en vrai
-     |       - Arg:
      |  
      |  calibrate(this, display=False)
      |      Sets camera's position according to the space
@@ -90,8 +89,6 @@ CLASSES
      |  drawSpace(this, **kargs)
      |      Call me maybe
      |  
-     |  equalize(this, **kargs)
-     |  
      |  fgCompensate(this, **kargs)
      |      Apply logical 'or' to the original detection and foreground mask
      |  
@@ -129,10 +126,6 @@ CLASSES
      |  isInit(this)
      |      Is the device capturing ?
      |  
-     |  morph_closing(this, **kargs)
-     |  
-     |  morph_opening(this, **kargs)
-     |  
      |  release(this)
      |      Stop capturing
      |  
@@ -149,19 +142,6 @@ CLASSES
      |  setAnoisek(this, **kargs)
      |      Creates the kernel for de-noising
      |      - radius: kernel's radius
-     |  
-     |  setBloberUp(this, **kargs)
-     |      Set every parameter for the blob detection 
-     |      - min/maxThresh: Threshold to apply (erm)
-     |      - Area: Filter by area (True/False)
-     |      - min/maxArea: Obvious.
-     |      - Circularity: Filter by circularity (True/False)
-     |      - min/maxCircularity: [0,1]
-     |      - Convexity: Filter by convexity (True/False)
-     |      - min/maxConvexity: [0,1]
-     |      - Inertia: Filter by inertia (True/False)
-     |      - min/maxInertia: [0,1]
-     |      - minDist: minimal distance between blobs
      |  
      |  setBlurSize(this, size)
      |      Set blur kernel, number of pixels around to average
@@ -186,6 +166,8 @@ CLASSES
      |      - interval: time between takes (ms)
      |      - count: number of frame to take
      |  
+     |  setReferenceSP(this, **kargs)
+     |  
      |  skywalker(this, **kargs)
      |      Object detection in binary image by straight cut
      |      Allow cutting for a bit through void:
@@ -195,6 +177,8 @@ CLASSES
      |              x > 1: Pixels
      |       - bin: binary image to parse (3 channel matrix)
      |       - blur: add blur on 'bin' ? (bool)
+     |  
+     |  st(this, cam, **kargs)
      |  
      |  ----------------------------------------------------------------------
      |  Static methods defined here:

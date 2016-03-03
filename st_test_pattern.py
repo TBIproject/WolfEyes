@@ -10,7 +10,7 @@ min_palm_roi = [50, 50]
 
 # Création de la caméra
 cam = Camera()
-cam.init(0, width=W, height=H, exposure=-10)
+cam.init(0, width=W, height=H, exposure=-4)
 cam.setFOV(horizontal=math.radians(92.0))
 
 print 'looping...'
@@ -23,7 +23,7 @@ while 1:
 	
 	diff = cv2.absdiff(cam.reference, cam.frame)
 	diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-	diff = (diff > 10).astype(np.uint8)
+	diff = (diff > 20).astype(np.uint8)
 	
 	result = (diff * 255).astype(np.uint8)
 	result = cv2.cvtColor(result, cv2.COLOR_GRAY2BGR)

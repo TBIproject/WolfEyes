@@ -4,7 +4,7 @@ NAME
     CustomFilter - Curstom filter library
 
 FILE
-    b:\popolopo\__git (work)\wolfeyepython\wolfeyes\customfilter.py
+    c:\users\vivancoe\desktop\wolfeyes\wolfeyes\customfilter.py
 
 FUNCTIONS
     Deriv(img, kx=None, ky=None, dt=1)

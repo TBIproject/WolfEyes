@@ -2,14 +2,14 @@
 from WolfEyes.work import *
 
 W, H = (1280, 720)
-W, H = (640, 480)
+# W, H = (640, 480)
 
 # Création de la caméra
 cam = Camera()
 cam.init(0, width=W, height=H, exposure=-6)
 cam.setFOV(horizontal=math.radians(92.0))
-# cam.setImageVertBand(0.45, 0.5)
-cam.setImageVertBand(0, 0.5)
+cam.setImageVertBand(0.4, 0.5)
+# cam.setImageVertBand(0, 0.5)
 cam.setAnoisek(radius=3)
 # cam.setBlurSize(11)
 
@@ -30,7 +30,7 @@ while 1:
 	# thresh = cv2.adaptiveThreshold(gdiff, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 2*n+1, 0)
 	# for i in xrange(6): thresh = cv2.medianBlur(thresh, 5);
 	
-	zseqfijdzq = cf.Gamma(gdiff, 2)
+	zseqfijdzq = cf.Gamma(gdiff, 1.5)
 	S, thresh = cv2.threshold(zseqfijdzq, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 	cam._BINARY = thresh
 	
@@ -52,7 +52,7 @@ while 1:
 	cv2.imshow('reference', cam.reference)
 	cv2.imshow('source', cam.frame)
 	
-	if S > 10:
+	if S > 30:
 		cv2.imshow('qdzqzdqzqz', zseqfijdzq)
 		cv2.imshow('thresh', thresh)
 		cv2.imshow('gdiff', gdiff)

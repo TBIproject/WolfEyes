@@ -19,6 +19,8 @@ except: print 'OpenCV 3.x is required... Missing'; exit()
 import numpy as np
 
 # Popote perso
+from threading import Thread
+import CustomFilter as cf
 from tbiTools import *
 from D2Point import *
 from pyon import *
@@ -127,6 +129,21 @@ class Camera(object):
 		"""Setting camera's property"""
 		this.checkInit()
 		this._CAP.set(Camera.props.get(prop, prop), value)
+	
+	def Export(this, name):
+		with open(name+'.config', 'w') as f:
+			f.write(str(pyon(
+				space = this._SPACE,
+				pos = ~this._POS
+			)))
+			
+	def Import(this, name):
+		config = pyon()
+		with open(name+'.config', 'r') as f:
+			config.load(f.read())
+		this._SPACE.load(config.space)
+		this._POS = D2Point(*config.pos)
+		print str(config) + ' Done.'
 	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	# Là on commence la race de getters...
@@ -349,6 +366,54 @@ class Camera(object):
 		# On doit reset ou pas ?
 		if not noReset: this.resetBin()
 		return ret
+		
+	def setReferenceSP(this, **kargs):
+	
+		tolerance = kargs.get('tolerance', 20)
+		gamma = kargs.get('gamma', 1)
+
+		this.getFrame()
+		curr_frame = cf.Gamma(this._FRAME, gamma)
+		this._REF = curr_frame
+		this.maxes = curr_frame
+		this.mines = curr_frame
+
+		for i in range(9):
+			this.getFrame()
+			curr_frame = cf.Gamma(this._FRAME, gamma)
+			this._REF = this._REF / 2 + curr_frame / 2
+			this.maxes = np.maximum(this.maxes, curr_frame)
+			this.mines = np.minimum(this.mines, curr_frame)
+			
+		this.tolerance_maxes = (this.maxes.astype(np.int32) + tolerance).clip(0, 255).astype(np.uint8)
+		this.tolerance_mines = (this.mines.astype(np.int32) - tolerance).clip(0, 255).astype(np.uint8)
+		
+	def st(this, cam, **kargs):
+	
+		gamma = kargs.get('gamma', 1)
+		thresh = kargs.get('tolerance', 20)
+		med = kargs.get('med', 3)
+	
+		cam.getFrame()
+		
+		curr_frame = cf.Gamma(cam._FRAME, gamma)
+		valid_pixels_mask = np.logical_and(curr_frame > cam.mines, curr_frame < cam.maxes) * 255
+		over_pixels_mask = np.logical_and(curr_frame >= cam.maxes, curr_frame <= cam.tolerance_maxes) * 255
+		under_pixels_mask = np.logical_and(curr_frame >= cam.tolerance_mines, curr_frame <= cam.mines) * 255
+		unknown_over_mask = (curr_frame > cam.tolerance_maxes) * 255
+		unknown_under_mask = (curr_frame < cam.tolerance_mines) * 255
+		corrected_frame = (curr_frame & valid_pixels_mask) + (cam.maxes & over_pixels_mask) + (cam.mines & under_pixels_mask) + (curr_frame & unknown_over_mask) + (curr_frame & unknown_under_mask)
+		
+		diff = cv2.absdiff(corrected_frame.astype(np.uint8), cam._REF)
+		result = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+		cam._BINARY = ((result >= thresh) * 255).astype(np.uint8)
+		cam._BINARY = cv2.medianBlur(cam._BINARY, med)
+		cam.arounder(
+			maxCount=1000,
+			minArea=64,
+			maxDist=1,
+			thick=1
+		)
 	
 	# On stocke l'image de référence
 	def setReference(this, **kargs):

@@ -4,7 +4,7 @@ NAME
     tbiTools - Tools for everyday tasks
 
 FILE
-    b:\popolopo\__git (work)\wolfeyepython\wolfeyes\tbitools.py
+    c:\users\vivancoe\desktop\wolfeyes\wolfeyes\tbitools.py
 
 CLASSES
     Statos
@@ -27,13 +27,15 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
      |  
-     |  count
-     |  
      |  i
      |  
      |  j
      |  
+     |  maxCount
+     |  
      |  mean
+     |  
+     |  meanCount
 
 FUNCTIONS
     Constrain(min, max, *args)
@@ -56,10 +58,12 @@ FUNCTIONS
     channels(img)
         List an image's channels
     
+    coloroffset(img)
+    
     constrain(n, min, max)
         # Constrain
     
-    grounder(img)
+    grounder(img, dtype=None)
         Tries to remove absolute offset
         'img' must be a 3 colors image
     
