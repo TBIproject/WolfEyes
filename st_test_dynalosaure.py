@@ -9,7 +9,7 @@ cam = Camera()
 cam.init(0, width=W, height=H, exposure=-4)
 cam.setFOV(horizontal=math.radians(92.0))
 
-yolol = 20
+yolol = 50
 				  
 cam.getFrame()
 ref = cam.frame
@@ -27,11 +27,11 @@ print 'looping...'
 
 while 1:
 	cam.getFrame()
-	valid_pixels_mask = np.logical_and(cam.frame >= mines, cam.frame <= maxes) * 255
-	over_pixels_mask = np.logical_and(cam.frame > maxes, cam.frame <= maxes + yolol) * 255
-	under_pixels_mask = np.logical_and(cam.frame >= mines - yolol, cam.frame < mines) * 255
-	unknown_over_mask = (cam.frame > maxes + yolol) * 255
-	unknown_under_mask = (cam.frame < mines - yolol) * 255
+	valid_pixels_mask = np.logical_and(cam.frame > mines, cam.frame < maxes) * 255
+	over_pixels_mask = np.logical_and(cam.frame >= maxes, cam.frame <= (maxes + yolol)) * 255
+	under_pixels_mask = np.logical_and(cam.frame >= (mines - yolol), cam.frame <= mines) * 255
+	unknown_over_mask = (cam.frame > (maxes + yolol)) * 255
+	unknown_under_mask = (cam.frame < (mines - yolol)) * 255
 	corrected_frame = (cam.frame & valid_pixels_mask) + (maxes & over_pixels_mask) + (mines & under_pixels_mask) + (cam.frame & unknown_over_mask) + (cam.frame & unknown_under_mask)
 	
 	diff = cv2.absdiff(corrected_frame.astype(np.uint8), ref.astype(np.uint8))
@@ -39,10 +39,17 @@ while 1:
 	result = (result > 20) * 255
 	result = cv2.medianBlur(result.astype(np.uint8), 3)
 	
+	temoinosaure = cv2.absdiff(cam.frame, ref)
+	temoinosaure = cv2.cvtColor(temoinosaure, cv2.COLOR_BGR2GRAY)
+	temoinosaure = (temoinosaure > 20) * 255
+	temoinosaure = cv2.medianBlur(temoinosaure.astype(np.uint8), 3)
+	
 	# Affichage
-	cv2.imshow('cam', cam.frame)
-	cv2.imshow('diff', diff.astype(np.uint8))
-	cv2.imshow('result', result)
+	# cv2.imshow('cam', cam.frame)
+	# cv2.imshow('diff', diff.astype(np.uint8))
+	cv2.imshow('corrected_frame', corrected_frame.astype(np.uint8))
+	# cv2.imshow('result', result)
+	# cv2.imshow('temoinosaure', temoinosaure)
 	
 	# Input management
 	sKey = Camera.waitKey()
