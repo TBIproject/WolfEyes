@@ -15,14 +15,15 @@ cam.getFrame()
 ref = cam.frame
 maxes = cam.frame
 mines = cam.frame
-tolerance_maxes = (maxes.astype(np.int32) + yolol).clip(0, 255).astype(np.uint8)
-tolerance_mines = (mines.astype(np.int32) - yolol).clip(0, 255).astype(np.uint8)
 
-for i in range(19):
+for i in range(9):
 	cam.getFrame()
 	ref = ref / 2 + cam.frame / 2
 	maxes = np.maximum(maxes, cam.frame)
 	mines = np.minimum(mines, cam.frame)
+	
+tolerance_maxes = (maxes.astype(np.int32) + yolol).clip(0, 255).astype(np.uint8)
+tolerance_mines = (mines.astype(np.int32) - yolol).clip(0, 255).astype(np.uint8)
 
 
 print 'looping...'
@@ -36,22 +37,22 @@ while 1:
 	unknown_under_mask = (cam.frame < tolerance_mines) * 255
 	corrected_frame = (cam.frame & valid_pixels_mask) + (maxes & over_pixels_mask) + (mines & under_pixels_mask) + (cam.frame & unknown_over_mask) + (cam.frame & unknown_under_mask)
 	
-	diff = cv2.absdiff(corrected_frame.astype(np.uint8), ref.astype(np.uint8))
+	diff = cv2.absdiff(corrected_frame.astype(np.uint8), ref)
 	result = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-	result = (result > 20) * 255
-	result = cv2.medianBlur(result.astype(np.uint8), 3)
+	result = (result >= 20) * 255
+	result = cv2.medianBlur(result.astype(np.uint8), 5)
 	
 	temoinosaure = cv2.absdiff(cam.frame, ref)
 	temoinosaure = cv2.cvtColor(temoinosaure, cv2.COLOR_BGR2GRAY)
-	temoinosaure = (temoinosaure > 20) * 255
-	temoinosaure = cv2.medianBlur(temoinosaure.astype(np.uint8), 3)
+	temoinosaure = (temoinosaure >= 20) * 255
+	#temoinosaure = cv2.medianBlur(temoinosaure.astype(np.uint8), 5)
 	
 	# Affichage
 	cv2.imshow('cam', cam.frame)
 	#cv2.imshow('diff', diff.astype(np.uint8))
 	cv2.imshow('corrected_frame', corrected_frame.astype(np.uint8))
-	cv2.imshow('result', result)
-	cv2.imshow('temoinosaure', temoinosaure)
+	cv2.imshow('result', result.astype(np.uint8))
+	cv2.imshow('temoinosaure', temoinosaure.astype(np.uint8))
 	
 	# Input management
 	sKey = Camera.waitKey()
