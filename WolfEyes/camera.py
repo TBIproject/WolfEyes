@@ -561,19 +561,6 @@ class Camera(object):
 	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
-	def equalize(this, **kargs):
-		frame = this._FRAME
-		
-		for i in xrange(3):
-			
-			hist = cv2.calcHist([frame], [i], None, [256], [0, 256])[:]
-			min, max = hist.argmin(), hist.argmax()
-			
-			c = frame[:, :, i]
-			c[:,:] = ((c - min) / (max - min) * 255).astype(np.uint8)
-	
-	# ------------------------------------------------------- # ------------------------------------------------------- #
-	
 	# Traitement de l'image
 	# Algo par détection de couleur
 	def detectByColor(this, **kargs):
@@ -628,14 +615,14 @@ class Camera(object):
 		this._BINARY = bin = np.zeros((height(this._FRAME), width(this._FRAME)), np.uint8)
 		bin[:,:] = (result > seuil) * 255
 		
-		return {
-			"thermal": cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR),
-			"total": result.astype(np.uint8),
-			"result": bin.astype(np.uint8),
-			"cr": cr.astype(np.uint8),
-			"h": h.astype(np.uint8),
-			"a": a.astype(np.uint8)
-		}
+		return pyon(
+			thermal = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR),
+			total = result.astype(np.uint8),
+			result = bin.astype(np.uint8),
+			cr = cr.astype(np.uint8),
+			h = h.astype(np.uint8),
+			a = a.astype(np.uint8)
+		)
 	
 	# Traitement de l'image
 	# Algo par différence d'image
@@ -657,10 +644,10 @@ class Camera(object):
 		this._BINARY = delta = EmptyFrom(diff, 1)
 		delta[:,:] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
 		
-		return {
-			'AbsDiff': diff,
-			'Threshold': delta
-		}
+		return pyon(
+			AbsDiff = diff,
+			Threshold = delta
+		)
 		
 	# Différence avec pesage de la luminosité
 	def detectByRefAdv(this, **kargs):
@@ -687,12 +674,12 @@ class Camera(object):
 		this._BINARY = delta = EmptyFrom(sat, 1)
 		delta[:,:] = ((sat[:,:,2] + sat[:,:,1] + sat[:,:,0]) > seuil) * 255
 		
-		return {
-			'AbsDiff': diff,
-			'Weight': weight % 1,
-			'Weighted': sat,
-			'Threshold': delta
-		}
+		return pyon(
+			AbsDiff = diff,
+			Weight = weight % 1,
+			Weighted = sat,
+			Threshold = delta
+		)
 		
 	# Traitement de l'image
 	# Algo chelou proposé par Estelol
@@ -745,15 +732,15 @@ class Camera(object):
 		result = (h/3 + a/3 + delta/3)
 		bin[:,:] = (result > seuilColor) * 255
 		
-		return {
-			"result": this._SCAN.astype(np.uint8),
-			"total": result.astype(np.uint8),
-			"delta": delta.astype(np.uint8),
-			"diff": diff.astype(np.uint8),
-			"cr": cr.astype(np.uint8),
-			"h": h.astype(np.uint8),
-			"a": a.astype(np.uint8)
-		}
+		return pyon(
+			result = this._SCAN.astype(np.uint8),
+			total = result.astype(np.uint8),
+			delta = delta.astype(np.uint8),
+			diff = diff.astype(np.uint8),
+			cr = cr.astype(np.uint8),
+			h = h.astype(np.uint8),
+			a = a.astype(np.uint8)
+		)
 	
 	# Magnifique idée de Maxou, pas compliqué en plus !
 	# Saber: On additionne toutes les colonnes de 'binary'
@@ -833,17 +820,6 @@ class Camera(object):
 		for thresh in args:
 			bin[:,:] = (cv2.filter2D(bin, -1, anoisek) / 2.55 > thresh) * 255
 		return True
-	
-	# ------------------------------------------------------- # ------------------------------------------------------- #
-	# Du caca
-	
-	def morph_closing(this, **kargs):
-		bin = this._BINARY
-		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_CLOSE, np.ones((5,5)))
-	
-	def morph_opening(this, **kargs):
-		bin = this._BINARY
-		bin[:,:] = cv2.morphologyEx(bin, cv2.MORPH_OPEN, np.ones((5,5)))
 	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
@@ -934,75 +910,6 @@ class Camera(object):
 		
 		# Tchao
 		return result
-	
-	# Parametrage du blob
-	def setBloberUp(this, **kargs):
-		"""Set every parameter for the blob detection 
-		 - min/maxThresh: Threshold to apply (erm)
-		 - Area: Filter by area (True/False)
-		 - min/maxArea: Obvious.
-		 - Circularity: Filter by circularity (True/False)
-		 - min/maxCircularity: [0,1]
-		 - Convexity: Filter by convexity (True/False)
-		 - min/maxConvexity: [0,1]
-		 - Inertia: Filter by inertia (True/False)
-		 - min/maxInertia: [0,1]
-		 - minDist: minimal distance between blobs
-		"""
-		
-		# Setup SimpleBlobDetector parameters.
-		params = cv2.SimpleBlobDetector_Params()
-		
-		# Change thresholds
-		params.minThreshold = kargs.get('minThresh', 0);
-		params.maxThreshold = kargs.get('maxThresh', 255);
-		
-		# Filter by Area.
-		params.filterByArea = kargs.get('Area', False)
-		params.minArea = kargs.get('minArea', 0)
-		params.maxArea = kargs.get('maxArea', 1920*1080)
-		
-		# Filter by Circularity
-		params.filterByCircularity = kargs.get('Circularity', False)
-		params.minCircularity = kargs.get('minCircularity', 0.0)
-		params.maxCircularity = kargs.get('maxCircularity', 1.0)
-		
-		# Filter by Convexity
-		params.filterByConvexity = kargs.get('Convexity', False)
-		params.minConvexity = kargs.get('minConvexity', 0.0)
-		params.maxConvexity = kargs.get('maxConvexity', 1.0)
-		
-		# Filter by Inertia
-		params.filterByInertia = kargs.get('Inertia', False)
-		params.minInertiaRatio = kargs.get('minInertia', 0.0)
-		params.maxInertiaRatio = kargs.get('maxInertia', 1.0)
-		
-		# Distance between blobs
-		params.minDistBetweenBlobs = kargs.get('minDist', 0)
-		
-		# Création du detecteur de blob
-		this.__BlobDetector = cv2.SimpleBlobDetector_create(params)
-	
-	# Algorithme de detection de blob
-	def blober(this, **kargs):
-		"""Blob detection
-		C'est de la merde en vrai
-		 - Arg: 
-		"""
-		
-		# Petite vérif
-		if not hasattr(this, '__BlobDetector'): this.setBloberUp()
-		blober = this.__BlobDetector
-		
-		bin = this._BINARY
-		this._SCAN = scan = EmptyFrom(bin, 3)
-		
-		keypoints = blober.detect(bin)
-		truc = cv2.drawKeypoints(scan, keypoints, np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-		
-		return {
-			'keypoints': truc.astype(np.uint8)
-		}
 	
 	# Algorithme de détection de countours
 	def arounder(this, **kargs):
@@ -1099,9 +1006,9 @@ class Camera(object):
 		# On enregistre le truc
 		this._DETECTED = finger
 		
-		return {
-			'contours': scan
-		}
+		return pyon(
+			contours = scan
+		)
 ###"""
 
 # Si un débile lance le module directement

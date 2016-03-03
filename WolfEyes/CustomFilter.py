@@ -56,6 +56,25 @@ def Laplacian(img):
 	]))).astype(np.uint8)
 ###
 
+"""
+def dtReconstruct(img, k=None, d=0):
+	dir = pyon()
+	dir[0] = [0, ScharrY]
+	dir[1] = [1, ScharrX]
+	dir.setUnknown(dir[0])
+	if k is None: k = dir[d]
+	
+	reconstruct = np.zeros(img.shape, np.uint8)
+	dt = cv2.filter2D(img.astype(np.float32), -1, k[1]) / 16.0
+	# np.apply_along_axis(func1d, dir[0], dt)
+	for i in xrange(dt.shape[0]):
+		line = dt[i,:]
+		for j in xrange(dt.shape[0]-1, -1, -1):
+			reconstruct[j] += line
+	
+	return reconstruct
+###"""
+
 def Gamma(img, gamma=1):
 	return (((img / 255.0) ** gamma) * 255).astype(np.uint8)
 ###

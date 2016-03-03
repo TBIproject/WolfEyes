@@ -10,6 +10,7 @@ cam.init(0, width=W, height=H, exposure=-6)
 cam.setFOV(horizontal=math.radians(92.0))
 # cam.setImageVertBand(0.45, 0.5)
 cam.setImageVertBand(0, 0.5)
+cam.setAnoisek(radius=3)
 # cam.setBlurSize(11)
 
 mouse.SMOOTH = 5
@@ -24,34 +25,41 @@ while 1:
 	diff = cv2.absdiff(cam.frame, cam.reference)
 	hist = histogram(cam.frame)
 	
+	gdiff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+	# n = 100
+	# thresh = cv2.adaptiveThreshold(gdiff, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 2*n+1, 0)
+	# for i in xrange(6): thresh = cv2.medianBlur(thresh, 5);
+	
+	zseqfijdzq = cf.Gamma(gdiff, 2)
+	S, thresh = cv2.threshold(zseqfijdzq, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+	cam._BINARY = thresh
+	
+	cam.anoise(40)
+	
+	cam.arounder()
+	
 	b = cam.frame[:,:,0]
 	g = cam.frame[:,:,1]
 	r = cam.frame[:,:,2]
 	
-	hb = histogram(b)
-	hg = histogram(g)
-	hr = histogram(r)
-	
-	bg = cv2.medianBlur(g, 3)
-	# dg = cv2.Sobel(cam.frame, cv2.CV_64F, 1, 1, ksize=-1)
+	# bg = cv2.medianBlur(g, 3)
 	dg = cf.Scharr(cam.frame, 1)
-	bb = cv2.GaussianBlur(b, (5, 5), 1)
-	lapl = cf.Laplacian(cam.frame)
+	# bb = cv2.GaussianBlur(b, (5, 5), 1)
 	
 	# dg = ((dg > 32) * 255).astype(np.uint8)
 	
 	# Affichage
+	cv2.imshow('reference', cam.reference)
 	cv2.imshow('source', cam.frame)
-	# cv2.imshow('reference', cam.reference)
-	# cv2.imshow('diff', diff)
-	cv2.imshow('qzdqzdqzd', hist)
-	cv2.imshow('Laplacian', lapl)
-	# cv2.imshow('r', r)
-	cv2.imshow('g', g)
-	# cv2.imshow('b', b)
-	cv2.imshow('bg', bg)
-	# cv2.imshow('bb', bb)
-	cv2.imshow('dg', dg)
+	
+	if S > 10:
+		cv2.imshow('qdzqzdqzqz', zseqfijdzq)
+		cv2.imshow('thresh', thresh)
+		cv2.imshow('gdiff', gdiff)
+		cv2.imshow('diff', diff)
+		cv2.imshow('hist', hist)
+	
+	cv2.imshow('oij', cam.stream)
 	
 	# Input management
 	sKey = Camera.waitKey()
