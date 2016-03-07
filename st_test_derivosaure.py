@@ -3,37 +3,56 @@ from WolfEyes.work import *
 
 W, H = (1280, 720)
 W, H = (640, 480)
-blockSize = (10,10)
+
+blockSize = pyon(
+	width = 5,
+	height = 5,
+)
+
+spread = 5
+
 
 # Création de la caméra
 cam = Camera()
 cam.init(0, width=W, height=H, exposure=-4)
 cam.setFOV(horizontal=math.radians(92.0))
-#cam.setImageVertBand(0.45, 0.51)
+cam.setImageVertBand(0.45, 0.55)
 
 cam.setReference(count=10)
 ref_deriv = cf.Scharr(cam.reference)
-
-ref_deriv_part = ref_deriv[0:blockSize[1], 0:blockSize[0]]
-print(float(ref_deriv_part.sum()) / float((blockSize[1] * blockSize[0]) * 3))
 
 print 'looping...'
 
 while 1:
 	cam.getFrame()
-	corrected_frame = cam.reference
+	corrected_frame = cam.reference.copy()
 	deriv = cf.Scharr(cam.frame)
 	
+	filling = False
 	
+	for y in xrange(0, deriv.shape[0], blockSize.height):
+		for x in xrange(0, deriv.shape[1], blockSize.width):
+			ref_deriv_part = ref_deriv[y:y+blockSize.height, x:x+blockSize.width]
+			deriv_part = deriv[y:y+blockSize.height, x:x+blockSize.width]
+			
+			deriv_diff = abs(int(ref_deriv_part.sum()) - int(deriv_part.sum())) / float(blockSize.width * blockSize.height * 3 * 255)
+			
+			if deriv_diff >= 0.03:
+				filling = not filling
+				
+			if filling:
+				corrected_frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread] = cam.frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread]
+			# end if
+		# end if
+	# end for
 	
-	for y in xrange(0, deriv.shape[1], blockSize[1]):
-		for x in xrange(0, deriv.shape[0], blockSize[0]):
-			ref_deriv_part = ref_deriv[y:y+blockSize[1], x:x+blockSize[0]]
-			deriv_part = deriv[y:y+blockSize[1], x:x+blockSize[0]]
-		#end if
-	#end for
+	diff = cv2.absdiff(corrected_frame, cam.reference)
+	diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+	diff = ((diff > 20) * 255).astype(np.uint8)
 	
-	cv2.imshow('diff', deriv)
+	cv2.imshow('deriv', deriv)
+	cv2.imshow('corrected_frame', corrected_frame)
+	cv2.imshow('diff', diff)
 	
 	# Input management
 	sKey = Camera.waitKey()
