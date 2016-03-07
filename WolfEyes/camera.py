@@ -65,6 +65,9 @@ class Camera(object):
 		# On stocke la caméra dans un ensemble
 		Camera.CAMERAS.add(this)
 		
+		# Objet fourre-tout
+		this.PYON = pyon()
+		
 		# Objet de capture de la cam
 		this._CAP = None
 		
@@ -391,7 +394,7 @@ class Camera(object):
 	def st(this, cam, **kargs):
 	
 		gamma = kargs.get('gamma', 1)
-		thresh = kargs.get('tolerance', 20)
+		thresh = kargs.get('tolerance', this.PYON.tolerance)
 		med = kargs.get('med', 3)
 	
 		cam.getFrame()

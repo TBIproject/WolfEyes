@@ -22,11 +22,11 @@ ScharrY = np.array([
 ###############################################################
 
 # Custom pseudo-derivation method
-def Deriv(img, kx=None, ky=None, dt=1):
+def Deriv(img, dt=1, **kargs):
 	# Images
 	x = y = img.astype(np.float32)
-	if kx is None: kx = ScharrX
-	if ky is None: ky = ScharrY
+	kx = kargs.get('kx', ScharrX)
+	ky = kargs.get('ky', ScharrY)
 	
 	# Dérivation(s)
 	# 16 * 2 * 255 = 8160 max
@@ -36,15 +36,18 @@ def Deriv(img, kx=None, ky=None, dt=1):
 		y = cv2.filter2D(y, -1, ScharrY) / 16.0
 	###
 	
-	return x, y
+	return pyon(
+		dx = x,
+		dy = y
+	)
 ###
 
 def Scharr(img, dt=1):
 	result = np.zeros(img.shape, np.int16)
 	
-	x, y = Deriv(img, ScharrX, ScharrY, dt)
+	d = Deriv(img, dt)
 	
-	result = (np.abs(x) + np.abs(y)) / 2.0
+	result = (np.abs(d.dx) + np.abs(d.dy)) / 2.0
 	return result.astype(np.uint8)
 ###
 
@@ -54,6 +57,23 @@ def Laplacian(img):
 		[0.5, 0, -0.5],
 		[0, -0.5, 0]
 	]))).astype(np.uint8)
+###
+
+def dyReconstruct(img):
+	reconstruct = np.zeros(img.shape, np.uint16)
+	dy = Deriv(img).dy
+	
+	for y in xrange(img.shape[0]):
+		reconstruct[y:] += dy[y]
+	
+	return pyon(
+		original = reconstruct,
+		reworked = (reconstruct - reconstruct.min()).astype(np.uint8)
+	)
+###
+
+def crash(img):
+	return img - img.min()
 ###
 
 """
