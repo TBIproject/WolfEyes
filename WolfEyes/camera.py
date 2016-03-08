@@ -541,7 +541,7 @@ class Camera(object):
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
 	# Pour calibrer la caméra
-	def calibrate(this, display=False): # C'est des maths.
+	def calibrate_old(this, display=False): # C'est des maths.
 		"""Sets camera's position according to the space"""
 		# a -> Angle Alpha
 		# b -> Angle Beta
@@ -565,6 +565,42 @@ class Camera(object):
 			# Position finale
 			this._POS.x = x = (1 + k / math.tan(a)) / (1 + k**2)
 			this._POS.y = x * k
+		
+		# Erm
+		except: this._POS = None
+		
+		# Petit affichage oklm
+		if display: print 'Calibration: %f %f %s' % (math.degrees(a), math.degrees(b), ~this._POS)
+		return this._POS
+	
+	# Pour calibrer la caméra
+	def calibrate(this, display=False, **kargs): # C'est des maths.
+		"""Sets camera's position according to the space"""
+		# a -> Angle Alpha
+		# b -> Angle Beta
+		
+		h = float(kargs.get('h', 1))
+		w = float(kargs.get('w', 1))
+		
+		# Verif de l'espace
+		space = this._SPACE
+		if not space: return None
+		
+		#try:
+		try:
+		
+			# Calcul d'angles
+			a = this._FOV.x * (space.i - space.o)
+			b = this._FOV.x * (space.o - space.j)
+		
+			# On essaye gentillement
+			Ca = w / math.tan(a) - h
+			Cb = h / math.tan(b) - w
+			kx = Ca/Cb
+			
+			# Position finale
+			this._POS.x = x = (h / math.tan(b) + kx) / (1 + kx**2)
+			this._POS.y = x * kx
 		
 		# Erm
 		except: this._POS = None
