@@ -22,7 +22,7 @@ cf = CustomFilter
 mouse = MouseControl
 tools = tbiTools
 
-# On remet comme รงa va bien
+# On remet comme ça va bien
 sys.stdout = OUT
 NUL.close()
 

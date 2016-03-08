@@ -3,7 +3,7 @@ import sys
 OUT = sys.stdout
 NUL = open('nul', 'w')
 
-# Sauvegarde de l'?tat initial
+# Sauvegarde de l'état initial
 START = set(dir())
 
 # On capture tout dans le vide
@@ -26,11 +26,11 @@ np = numpy
 cf = CustomFilter
 mouse = MouseControl
 
-# On remet comme รงa va bien
+# On remet comme ça va bien
 sys.stdout = OUT
 NUL.close()
 
-# Etat final (apr?s imports)
+# Etat final (après imports)
 END = set(dir())
 
 # __all__ = ['Space', 'Camera', 'D2Point', 'pyon', 'MouseControl', 'mouse', 'math', 'time', 'cv2', 'numpy', 'np']

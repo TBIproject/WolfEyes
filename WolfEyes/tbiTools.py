@@ -111,7 +111,29 @@ def anoisek(r=5, debug=False):
 	###
 	
 	kernel /= kernel.sum()
-	return kernel	
+	return kernel
+###
+
+# Retourne l'histogramme de l'image
+def imhist(img, i=0):
+	return cv2.calcHist([img], [i], None, [256], [0, 256])[:,0]
+###
+
+def histMean(hist):
+	m = 0.0;
+	for i in xrange(len(hist)): m += i * hist[i]
+	return m / hist.sum()
+###
+
+def imEntropy(img):
+	hist = imhist(im)
+	print hist
+	
+	e = 0.0
+	
+	
+	return e
+###
 
 # Création d'une image à partir d'un histogramme
 def histogram(img, gamma=0.3):
@@ -126,8 +148,8 @@ def histogram(img, gamma=0.3):
 	for i in range(cans):
 		
 		# On calcule
-		hist = cv2.calcHist([img], [i], None, [256], [0, 256])
-		values = (255 * (hist / max)**gamma).astype(np.uint8)[:]
+		hist = imhist(img)
+		values = (255 * (hist / max)**gamma).astype(np.uint8)
 		
 		# On affiche
 		for j in xrange(len(values)):

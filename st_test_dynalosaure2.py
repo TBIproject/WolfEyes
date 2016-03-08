@@ -3,20 +3,25 @@ from WolfEyes.work import *
 
 W, H = (1280, 720)
 W, H = (640, 480)
+exp = -5
 
 # Création de la caméra 1
 cam1 = Camera()
-cam1.init(0, width=W, height=H, exposure=-4)
+cam1.init(0, width=W, height=H, exposure=exp)
 cam1.setFOV(horizontal=math.radians(92.0))
-cam1.setImageVertBand(0.4, 0.505)
+cam1.setImageVertBand(0.4, 0.49)
 cam1.setReferenceSP()
 
 # Création de la caméra 2
 cam2 = Camera()
-cam2.init(1, width=W, height=H, exposure=-4)
+cam2.init(1, width=W, height=H, exposure=exp)
 cam2.setFOV(horizontal=math.radians(92.0))
 cam2.setImageVertBand(0.4, 0.495)
 cam2.setReferenceSP()
+
+t = 30
+cam1.PYON.tolerance = t
+cam2.PYON.tolerance = t
 
 mouse.SMOOTH = 2
 
