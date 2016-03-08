@@ -5,8 +5,8 @@ W, H = (1280, 720)
 W, H = (640, 480)
 
 blockSize = pyon(
-	width = 5,
-	height = 5,
+	width = 10,
+	height = 10,
 )
 
 spread = 20
@@ -26,7 +26,9 @@ while 1:
 	cam.getFrame()
 	corrected_frame = cam.reference.copy()
 	deriv = cf.Scharr(cam.frame)
-	deriv = cv2.dilate(deriv, (9, 9))
+	deriv = cv2.GaussianBlur(deriv, (5, 5), 5)
+	deriv = ((cf.Deriv(deriv, 2).dy > 0) * 255).astype(np.uint8) / 2 + ((cf.Deriv(deriv, 2).dx > 0) * 255).astype(np.uint8) / 2
+	#deriv = cv2.dilate(deriv, (9, 9))
 	
 	for y in xrange(0, deriv.shape[0], blockSize.height):
 		filling = False
@@ -61,7 +63,7 @@ while 1:
 	cam.arounder(
 		maxCount=1000,
 		minArea=64,
-		maxDist=1,
+		maxDist=10000,
 		thick=1
 	)
 	
