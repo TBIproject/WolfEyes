@@ -19,6 +19,9 @@ cam.setImageVertBand(0.45, 0.55)
 
 cam.setReference(count=10)
 ref_deriv = cf.Scharr(cam.reference)
+ref_deriv = cf.Gamma(ref_deriv, 0.5)
+ref_deriv_mask = ((ref_deriv > 50) * 255).astype(np.uint8)
+ref_deriv = ref_deriv & ref_deriv_mask
 
 print 'looping...'
 
@@ -26,17 +29,9 @@ while 1:
 	cam.getFrame()
 	corrected_frame = cam.reference.copy()
 	deriv = cf.Scharr(cam.frame)
-	deriv = cv2.GaussianBlur(deriv, (5, 5), 5)
-	
-	deriv = ((-(cf.Deriv(deriv, 2).dy)).clip(0, 255) * 255).astype(np.uint8)
-	deriv = cv2.erode(cv2.cvtColor(deriv, cv2.COLOR_BGR2GRAY), (5, 5))
-	
-	# double_deriv = -(cf.Deriv(deriv, 2).dy.astype(np.int32))
-	# deriv_sum = double_deriv.sum(axis=2)
-	#deriv = ((deriv_sum >= 2) * 255).astype(np.uint8)
-	
-	#deriv = (-(cf.Deriv(deriv, 2).dy > 0) * 255).astype(np.uint8) / 2 + (-(cf.Deriv(deriv, 2).dx > 0) * 255).astype(np.uint8) / 2
-	#deriv = cv2.dilate(deriv, (9, 9))
+	deriv = cf.Gamma(deriv, 0.5)
+	deriv_mask = ((deriv > 50) * 255).astype(np.uint8)
+	deriv = deriv & deriv_mask
 	
 	for y in xrange(0, deriv.shape[0], blockSize.height):
 		filling = False
@@ -64,14 +59,14 @@ while 1:
 	
 	diff = cv2.absdiff(corrected_frame, cam.reference)
 	diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-	diff = ((diff > 20) * 255).astype(np.uint8)
+	diff = ((diff > 15) * 255).astype(np.uint8)
 	
 	cam._BINARY = diff.copy();
 	
 	cam.arounder(
 		maxCount=1000,
 		minArea=64,
-		maxDist=10000,
+		maxDist=5,
 		thick=1
 	)
 	
