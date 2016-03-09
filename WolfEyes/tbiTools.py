@@ -126,9 +126,7 @@ def histMean(hist):
 ###
 
 def imEntropy(img):
-	hist = imhist(im)
-	print hist
-	
+	sum = im.shape[0] * im.shape[1]
 	e = 0.0
 	
 	
@@ -201,6 +199,11 @@ def grounder(img, dtype=None):
 
 def rgbsum(img):
 	return img.sum(axis=2)
+	
+def crash(img, ksize=(5, 5), sigmaX=2, *args):
+	mean = cv2.GaussianBlur(img, ksize, sigmaX, *args)
+	print [img.min(), mean.min()]
+	return (img.astype(np.int16) - mean.min()).clip(0, 255).astype(np.uint8)
 	
 # Objet pour retourner des trucs
 class Statos:

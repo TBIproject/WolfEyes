@@ -5,17 +5,17 @@ W, H = (1280, 720)
 W, H = (640, 480)
 
 blockSize = pyon(
-	width = 10,
-	height = 10,
+	width = 8,
+	height = 8,
 )
 
-spread = 20
+spread = 10
 
 # Création de la caméra
 cam = Camera()
 cam.init(0, width=W, height=H, exposure=-4)
 cam.setFOV(horizontal=math.radians(92.0))
-cam.setImageVertBand(0.45, 0.55)
+cam.setImageVertBand(0.40, 0.48)
 
 cam.setReference(count=10)
 ref_deriv = cf.Scharr(cam.reference)
@@ -42,7 +42,7 @@ while 1:
 			
 			deriv_diff = abs(int(ref_deriv_part.sum()) - int(deriv_part.sum())) / float(blockSize.width * blockSize.height * 3 * 255)
 			
-			if deriv_diff >= 0.025:
+			if deriv_diff >= 0.1:
 				corrected_frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread] = cam.frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread]
 
 				# if can_close:
@@ -59,7 +59,7 @@ while 1:
 	
 	diff = cv2.absdiff(corrected_frame, cam.reference)
 	diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-	diff = ((diff > 15) * 255).astype(np.uint8)
+	diff = ((diff > 10) * 255).astype(np.uint8)
 	
 	cam._BINARY = diff.copy();
 	

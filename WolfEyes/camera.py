@@ -71,6 +71,9 @@ class Camera(object):
 		# Objet de capture de la cam
 		this._CAP = None
 		
+		# Fonction ++
+		this.onFrameGet = lambda x: x
+		
 		# Coordonnées de la caméra
 		this._POS = D2Point()
 		
@@ -135,10 +138,11 @@ class Camera(object):
 	
 	def Export(this, name):
 		with open(name+'.config', 'w') as f:
-			f.write(str(pyon(
+			data = str(pyon(
 				space = this._SPACE,
 				pos = ~this._POS
-			)))
+			)); f.write(data)
+			print '%s OK' % (data,)
 			
 	def Import(this, name):
 		config = pyon()
@@ -359,8 +363,8 @@ class Camera(object):
 				b = this._BAND.y * height(frame)
 				frame = frame[a:b:this._RES,:,:]
 				if this._KERNEL is not None: # On applique un flou uniquement pour lisser le bruit
-					this._FRAME = cv2.filter2D(frame, -1, this._KERNEL)
-				else: this._FRAME = frame
+					frame = cv2.filter2D(frame, -1, this._KERNEL)
+				this._FRAME = this.onFrameGet(frame)
 				break #bye
 			
 			# On a pas eu d'image...
@@ -369,52 +373,95 @@ class Camera(object):
 		# On doit reset ou pas ?
 		if not noReset: this.resetBin()
 		return ret
+	
+	# def setReferenceSP(this, **kargs):
+	
+		# tolerance = kargs.get('tolerance', 20)
+		# gamma = kargs.get('gamma', 1)
+
+		# this.getFrame()
+		# curr_frame = cf.Gamma(this._FRAME, gamma)
+		# this._REF = curr_frame
+		# this.maxes = curr_frame
+		# this.mines = curr_frame
+
+		# for i in range(9):
+			# this.getFrame()
+			# curr_frame = cf.Gamma(this._FRAME, gamma)
+			# this._REF = this._REF / 2 + curr_frame / 2
+			# this.maxes = np.maximum(this.maxes, curr_frame)
+			# this.mines = np.minimum(this.mines, curr_frame)
+			
+		# this.tolerance_maxes = (this.maxes.astype(np.int32) + tolerance).clip(0, 255).astype(np.uint8)
+		# this.tolerance_mines = (this.mines.astype(np.int32) - tolerance).clip(0, 255).astype(np.uint8)
 		
 	def setReferenceSP(this, **kargs):
-	
-		tolerance = kargs.get('tolerance', 20)
-		gamma = kargs.get('gamma', 1)
-
-		this.getFrame()
-		curr_frame = cf.Gamma(this._FRAME, gamma)
-		this._REF = curr_frame
-		this.maxes = curr_frame
-		this.mines = curr_frame
-
-		for i in range(9):
-			this.getFrame()
-			curr_frame = cf.Gamma(this._FRAME, gamma)
-			this._REF = this._REF / 2 + curr_frame / 2
-			this.maxes = np.maximum(this.maxes, curr_frame)
-			this.mines = np.minimum(this.mines, curr_frame)
-			
-		this.tolerance_maxes = (this.maxes.astype(np.int32) + tolerance).clip(0, 255).astype(np.uint8)
-		this.tolerance_mines = (this.mines.astype(np.int32) - tolerance).clip(0, 255).astype(np.uint8)
+		count = kargs.get('count', 10)
 		
-	def st(this, cam, **kargs):
+		this.setReference(count=count)
+		ref_deriv = cf.Scharr(this.reference)
+		ref_deriv = cf.Gamma(ref_deriv, this.PYON.gamma)
+		ref_deriv_mask = ((ref_deriv > 50) * 255).astype(np.uint8)
+		this.ref_deriv = ref_deriv & ref_deriv_mask
+		
+	# def st(this, cam, **kargs):
 	
-		gamma = kargs.get('gamma', 1)
-		thresh = kargs.get('tolerance', this.PYON.tolerance)
-		med = kargs.get('med', 3)
+		# gamma = kargs.get('gamma', 1)
+		# thresh = kargs.get('tolerance', this.PYON.tolerance)
+		# med = kargs.get('med', 3)
 	
+		# cam.getFrame()
+		
+		# curr_frame = cf.Gamma(cam._FRAME, gamma)
+		# valid_pixels_mask = np.logical_and(curr_frame > cam.mines, curr_frame < cam.maxes) * 255
+		# over_pixels_mask = np.logical_and(curr_frame >= cam.maxes, curr_frame <= cam.tolerance_maxes) * 255
+		# under_pixels_mask = np.logical_and(curr_frame >= cam.tolerance_mines, curr_frame <= cam.mines) * 255
+		# unknown_over_mask = (curr_frame > cam.tolerance_maxes) * 255
+		# unknown_under_mask = (curr_frame < cam.tolerance_mines) * 255
+		# corrected_frame = (curr_frame & valid_pixels_mask) + (cam.maxes & over_pixels_mask) + (cam.mines & under_pixels_mask) + (curr_frame & unknown_over_mask) + (curr_frame & unknown_under_mask)
+		
+		# diff = cv2.absdiff(corrected_frame.astype(np.uint8), cam._REF)
+		# result = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+		# cam._BINARY = ((result >= thresh) * 255).astype(np.uint8)
+		# cam._BINARY = cv2.medianBlur(cam._BINARY, med)
+		# cam.arounder(
+			# maxCount=1000,
+			# minArea=64,
+			# maxDist=1,
+			# thick=1
+		# )
+		
+	def st(this, cam, **kargs):	
 		cam.getFrame()
+		corrected_frame = cam.reference.copy()
+		deriv = cf.Scharr(cam.frame)
+		deriv = cf.Gamma(deriv, cam.PYON.gamma)
+		deriv_mask = ((deriv > cam.PYON.deriv_thresh) * 255).astype(np.uint8)
+		deriv = deriv & deriv_mask
 		
-		curr_frame = cf.Gamma(cam._FRAME, gamma)
-		valid_pixels_mask = np.logical_and(curr_frame > cam.mines, curr_frame < cam.maxes) * 255
-		over_pixels_mask = np.logical_and(curr_frame >= cam.maxes, curr_frame <= cam.tolerance_maxes) * 255
-		under_pixels_mask = np.logical_and(curr_frame >= cam.tolerance_mines, curr_frame <= cam.mines) * 255
-		unknown_over_mask = (curr_frame > cam.tolerance_maxes) * 255
-		unknown_under_mask = (curr_frame < cam.tolerance_mines) * 255
-		corrected_frame = (curr_frame & valid_pixels_mask) + (cam.maxes & over_pixels_mask) + (cam.mines & under_pixels_mask) + (curr_frame & unknown_over_mask) + (curr_frame & unknown_under_mask)
+		for y in xrange(0, deriv.shape[0], cam.PYON.blockSize.height):
+			for x in xrange(0, deriv.shape[1], cam.PYON.blockSize.width):
+				ref_deriv_part = cam.ref_deriv[y:y+cam.PYON.blockSize.height, x:x+cam.PYON.blockSize.width]
+				deriv_part = deriv[y:y+cam.PYON.blockSize.height, x:x+cam.PYON.blockSize.width]
+				
+				deriv_diff = abs(int(ref_deriv_part.sum()) - int(deriv_part.sum())) / float(cam.PYON.blockSize.width * cam.PYON.blockSize.height * 3 * 255)
+				
+				if deriv_diff >= cam.PYON.deriv_diff_thresh:
+					corrected_frame[y-cam.PYON.spread:y+cam.PYON.blockSize.height+cam.PYON.spread, x-cam.PYON.spread:x+cam.PYON.blockSize.width+cam.PYON.spread] = cam.frame[y-cam.PYON.spread:y+cam.PYON.blockSize.height+cam.PYON.spread, x-cam.PYON.spread:x+cam.PYON.blockSize.width+cam.PYON.spread]
+				#end if
+			# end if
+		# end for
 		
-		diff = cv2.absdiff(corrected_frame.astype(np.uint8), cam._REF)
-		result = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-		cam._BINARY = ((result >= thresh) * 255).astype(np.uint8)
-		cam._BINARY = cv2.medianBlur(cam._BINARY, med)
+		diff = cv2.absdiff(corrected_frame, cam.reference)
+		diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+		diff = ((diff > cam.PYON.thresh) * 255).astype(np.uint8)
+		
+		cam._BINARY = diff.copy();
+	
 		cam.arounder(
 			maxCount=1000,
 			minArea=64,
-			maxDist=1,
+			maxDist=5,
 			thick=1
 		)
 	
@@ -594,12 +641,12 @@ class Camera(object):
 			b = this._FOV.x * (space.o - space.j)
 		
 			# On essaye gentillement
-			Ca = w / math.tan(a) - h
-			Cb = h / math.tan(b) - w
+			Ca = w - h / math.tan(b)
+			Cb = h - w / math.tan(a)
 			kx = Ca/Cb
 			
 			# Position finale
-			this._POS.x = x = (h / math.tan(b) + kx) / (1 + kx**2)
+			this._POS.x = x = h * (kx + 1 / math.tan(b)) / (1 + kx**2)
 			this._POS.y = x * kx
 		
 		# Erm

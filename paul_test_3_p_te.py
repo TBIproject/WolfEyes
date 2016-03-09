@@ -19,7 +19,7 @@ cam.setReference(count=10)
 while 1:
 	for i in range(-10, -3):
 		cam.setProp('exposure', i)
-		for j in range(2): cam.getFrame()
+		for j in range(3): cam.getFrame()
 		
 		# On filme
 		cam.getFrame()
