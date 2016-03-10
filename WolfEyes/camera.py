@@ -16,15 +16,16 @@ try: # On essaye d'importer cv2
 	if v[0] != '3': print "OpenCV 3.x required, got %s..." % (v); exit()
 	del v # tout propre
 except: print 'OpenCV 3.x is required... Missing'; exit()
+from threading import Thread
 import numpy as np
 
 # Popote perso
-from threading import Thread
 import CustomFilter as cf
 from tbiTools import *
 from D2Point import *
 from pyon import *
 
+# RIP
 # Gestion du repère, en mesure d'angles relatifs
 class Space(object):
 	def __init__(this, o=0, i=0, j=0):
@@ -54,6 +55,47 @@ class Camera(object):
 	def waitKey(t=1):
 		k = cv2.waitKey(t) & 0xFF
 		return k
+	
+	# Default key management method
+	@staticmethod
+	def defaultKeyManagement(k, cam):
+		if k == 'q': return True # Stop
+		
+		elif k == 'o':
+			cam.space.o = cam.finger.x
+				
+		elif k == 'i':
+			cam.space.i = cam.finger.x
+		
+		elif k == 'j':
+			cam.space.j = cam.finger.x
+			
+		elif k == ' ':
+			cam.setReference(count=10)
+			
+		elif k == 'c':
+			cam.calibrate(True)
+			
+		elif k == '.':
+			cam.Export('cam')
+		
+		elif k == '0':
+			cam.Import('cam')
+	###
+	
+	# On assigne la fonction de key management
+	keyManagement = defaultKeyManagement
+	
+	# Celui qui fait tout
+	@staticmethod
+	def keyEvents(*args):
+		k = Camera.waitKey(*args)
+		if k < 255:
+			for cam in Camera.CAMERAS:
+				if Camera.keyManagement(chr(k), cam):
+					return True
+		return False
+	###
 	
 	# Liste des caméras
 	CAMERAS = set()
@@ -401,8 +443,10 @@ class Camera(object):
 		this.setReference(count=count)
 		ref_deriv = cf.Scharr(this.reference)
 		ref_deriv = cf.Gamma(ref_deriv, this.PYON.gamma)
-		ref_deriv_mask = ((ref_deriv > 50) * 255).astype(np.uint8)
+		ref_deriv_mask = ((ref_deriv > this.PYON.deriv_thresh) * 255).astype(np.uint8)
 		this.ref_deriv = ref_deriv & ref_deriv_mask
+		this.ref_deriv = cv2.erode(this.ref_deriv, (9, 9))
+		this.ref_deriv = cv2.dilate(this.ref_deriv, (9, 9))
 		
 	# def st(this, cam, **kargs):
 	
@@ -438,6 +482,8 @@ class Camera(object):
 		deriv = cf.Gamma(deriv, cam.PYON.gamma)
 		deriv_mask = ((deriv > cam.PYON.deriv_thresh) * 255).astype(np.uint8)
 		deriv = deriv & deriv_mask
+		deriv = cv2.erode(deriv, (9, 9))
+		deriv = cv2.dilate(deriv, (9, 9))
 		
 		for y in xrange(0, deriv.shape[0], cam.PYON.blockSize.height):
 			for x in xrange(0, deriv.shape[1], cam.PYON.blockSize.width):
@@ -517,6 +563,32 @@ class Camera(object):
 		this._REF = result
 		if count > 1: print 'ok'
 		return result
+	
+	# Exposure calibration
+	def autoExposure(this, **kargs):
+		"""Tryies to maximize entropy"""
+		
+		# Arguments
+		frames = kargs.get('frames', 4)
+		start = kargs.get('start', -10)
+		end = kargs.get('start', -3)
+		
+		max = 0
+		v = start
+		print 'Auto Exposition starting...'
+		
+		for i in range(start, end):
+			this.setProp('exposure', i)
+			for j in range(frames): this.getFrame()
+			
+			e = imEntropy(this.frame)
+			if e > max:
+				max = e
+				v = i
+		
+		this.setProp('exposure', v)
+		for j in range(frames): this.getFrame()
+		print 'Exposure Calibrated: %i / Entropy: %.4f' % (v, max)
 	
 	# On affiche la tarte aux pommes
 	def drawSpace(this, **kargs):

@@ -8,30 +8,32 @@ exp = -4
 # Création de la caméra 1
 cam1 = Camera()
 cam1.PYON.gamma = 0.5
-cam1.init(0, width=W, height=H, exposure=exp)
+cam1.PYON.deriv_thresh = 20
+cam1.init(0, width=W, height=H)
 cam1.setFOV(horizontal=math.radians(92.0))
-cam1.setImageVertBand(0.42, 0.5)
+cam1.setImageVertBand(0.43, 0.50)
+cam1.autoExposure()
 cam1.setReferenceSP()
 
 # Création de la caméra 2
 cam2 = Camera()
 cam2.PYON.gamma = 0.5
-cam2.init(1, width=W, height=H, exposure=exp)
+cam2.PYON.deriv_thresh = 20
+cam2.init(1, width=W, height=H)
 cam2.setFOV(horizontal=math.radians(92.0))
-cam2.setImageVertBand(0.42, 0.5)
+cam2.setImageVertBand(0.43, 0.50)
+cam2.autoExposure()
 cam2.setReferenceSP()
 
-cam1.PYON.deriv_thresh = 50
-cam1.PYON.deriv_diff_thresh = 0.1
+cam1.PYON.deriv_diff_thresh = 0.15
 cam1.PYON.thresh = 10
 cam1.PYON.spread = 10
-cam1.PYON.blockSize = pyon(width = 8, height = 8)
+cam1.PYON.blockSize = pyon(width = 4, height = 4)
 
-cam2.PYON.deriv_thresh = 50
-cam2.PYON.deriv_diff_thresh = 0.1
+cam2.PYON.deriv_diff_thresh = 0.15
 cam2.PYON.thresh = 10
 cam2.PYON.spread = 10
-cam2.PYON.blockSize = pyon(width = 8, height = 8)
+cam2.PYON.blockSize = pyon(width = 4, height = 4)
 
 mouse.SMOOTH = 2
 

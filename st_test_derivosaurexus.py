@@ -5,23 +5,27 @@ W, H = (1280, 720)
 W, H = (640, 480)
 
 blockSize = pyon(
-	width = 8,
-	height = 8,
+	width = 5,
+	height = 5,
 )
 
 spread = 10
 
 # Création de la caméra
 cam = Camera()
-cam.init(0, width=W, height=H, exposure=-4)
+cam.init(0, width=W, height=H)
+cam.autoExposure()
 cam.setFOV(horizontal=math.radians(92.0))
-cam.setImageVertBand(0.40, 0.48)
+cam.setImageVertBand(0.42, 0.48)
+cam.setAnoisek(radius=5)
 
 cam.setReference(count=10)
 ref_deriv = cf.Scharr(cam.reference)
 ref_deriv = cf.Gamma(ref_deriv, 0.5)
-ref_deriv_mask = ((ref_deriv > 50) * 255).astype(np.uint8)
-ref_deriv = ref_deriv & ref_deriv_mask
+ref_deriv = cf.Deriv(ref_deriv, 2)
+ref_deriv = ((-ref_deriv.dx).clip(0, 255)).astype(np.uint8) / 2 + ((-ref_deriv.dy).clip(0, 255)).astype(np.uint8) / 2
+#ref_deriv_mask = ((ref_deriv > 20) * 255).astype(np.uint8)
+#ref_deriv = ref_deriv & ref_deriv_mask
 
 print 'looping...'
 
@@ -30,8 +34,13 @@ while 1:
 	corrected_frame = cam.reference.copy()
 	deriv = cf.Scharr(cam.frame)
 	deriv = cf.Gamma(deriv, 0.5)
-	deriv_mask = ((deriv > 50) * 255).astype(np.uint8)
+	deriv = cf.Deriv(deriv, 2)
+	deriv = ((-deriv.dx).clip(0, 255)).astype(np.uint8) / 2 + ((-deriv.dy).clip(0, 255)).astype(np.uint8) / 2
+	deriv_mask = ((deriv > 20) * 255).astype(np.uint8)
 	deriv = deriv & deriv_mask
+	
+	# deriv = cv2.erode(deriv, (9, 9))
+	# deriv = cv2.dilate(deriv, (9, 9))
 	
 	for y in xrange(0, deriv.shape[0], blockSize.height):
 		filling = False
@@ -42,7 +51,7 @@ while 1:
 			
 			deriv_diff = abs(int(ref_deriv_part.sum()) - int(deriv_part.sum())) / float(blockSize.width * blockSize.height * 3 * 255)
 			
-			if deriv_diff >= 0.1:
+			if deriv_diff >= 0.15:
 				corrected_frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread] = cam.frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread]
 
 				# if can_close:

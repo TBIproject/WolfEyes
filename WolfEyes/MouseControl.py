@@ -19,7 +19,7 @@ MIDDLE = 3
 DRAG = False
 
 # Lissage du mouvement
-SMOOTH = 1
+SMOOTH = 2
 
 def position():
 	"""Return current mouse's position"""

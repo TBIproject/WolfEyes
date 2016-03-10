@@ -4,7 +4,7 @@ NAME
     D2Point - Custom weird vector, very useful.
 
 FILE
-    c:\users\vivancoe\desktop\wolfeyes\wolfeyes\d2point.py
+    b:\popolopo\__git (work)\wolfeyespython\wolfeyes\d2point.py
 
 CLASSES
     __builtin__.object

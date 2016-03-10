@@ -4,7 +4,7 @@ NAME
     tbiTools - Tools for everyday tasks
 
 FILE
-    c:\users\vivancoe\desktop\wolfeyes\wolfeyes\tbitools.py
+    b:\popolopo\__git (work)\wolfeyespython\wolfeyes\tbitools.py
 
 CLASSES
     Statos
@@ -52,6 +52,9 @@ FUNCTIONS
     EmptyFrom(img, chan=None)
         Creates an empty image from another (same size, uint8)
     
+    FullscreenCanvas(*args, **kargs)
+        # Create fullscreen window with canvas
+    
     anoisek(r=5, debug=False)
         Function to create a kernel for anti-noise purposes
     
@@ -63,6 +66,8 @@ FUNCTIONS
     constrain(n, min, max)
         # Constrain
     
+    crash(img, ksize=(5, 5), sigmaX=2, *args)
+    
     grounder(img, dtype=None)
         Tries to remove absolute offset
         'img' must be a 3 colors image
@@ -70,8 +75,17 @@ FUNCTIONS
     height(img)
         Get an image's height
     
+    histMean(hist)
+    
     histogram(img, gamma=0.3)
         Creates an image's histogram to display
+    
+    imEntropy(img)
+    
+    imEntropy2(img)
+    
+    imhist(img, i=0)
+        # Retourne l'histogramme de l'image
     
     limiter(contour, maxDist=0)
         Returns every extrem-bottom points from a contour

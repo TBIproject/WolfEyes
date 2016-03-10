@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-*
 """Tools for everyday tasks"""
+from threading import Thread
 from D2Point import *
+from pyon import pyon
+import Tkinter as Tk
 import numpy as np
 import cv2
 import sys
@@ -126,11 +129,32 @@ def histMean(hist):
 ###
 
 def imEntropy(img):
-	sum = im.shape[0] * im.shape[1]
-	e = 0.0
+	sum = img.shape[0] * img.shape[1]
 	
+	result = 0.0
+	for i in xrange(3):
+		chist = imhist(img, i)
+		e = 0.0
+		for j in xrange(len(chist)):
+			p = chist[j] / sum
+			e += p * (math.log(p, 2) if p else 0)
+		result -= e
+	return result / 3.0
+###
+
+def imEntropy2(img):
+	sum = img.shape[0] * img.shape[1]
+
+	result = 0.0
+	for i in xrange(3):
+		chist = imhist(img, i)
+		
+		p = chist / sum
+		e = (p * np.log2(p)).sum()
+		
+		result -= e
 	
-	return e
+	return e / 3.0
 ###
 
 # Création d'une image à partir d'un histogramme
@@ -271,3 +295,23 @@ class Statos:
 		
 		return this._max
 ### END STATOS
+
+# Create fullscreen window with canvas
+def FullscreenCanvas(*args, **kargs):
+	root = Tk.Tk()
+
+	# make it cover the entire screen
+	w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+	root.overrideredirect(1)
+	root.geometry("%dx%d+0+0" % (w, h))
+
+	canvas = Tk.Canvas(root, *args, **kargs)
+	canvas.pack(fill=Tk.BOTH, expand=Tk.YES)
+
+	Thread(target=root.mainloop).start()
+	
+	return pyon(
+		canvas=canvas,
+		window=root
+	)
+###

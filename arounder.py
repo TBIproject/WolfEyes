@@ -36,7 +36,7 @@ while 1:
 	cam.arounder(
 		maxCount=1000,
 		minArea=36,
-		maxDist=10,
+		maxDist=1,
 		thick=1
 	)
 	

@@ -4,7 +4,7 @@ NAME
     camera
 
 FILE
-    c:\users\vivancoe\desktop\wolfeyes\wolfeyes\camera.py
+    b:\popolopo\__git (work)\wolfeyespython\wolfeyes\camera.py
 
 DESCRIPTION
     AUTHOR(S): POPOLO, 
@@ -50,7 +50,13 @@ CLASSES
      |      - color: Painting color for accepted contours
      |      - thick: Lines thickness
      |  
-     |  calibrate(this, display=False)
+     |  autoExposure(this, **kargs)
+     |      Tryies to maximize entropy
+     |  
+     |  calibrate(this, display=False, **kargs)
+     |      Sets camera's position according to the space
+     |  
+     |  calibrate_old(this, display=False)
      |      Sets camera's position according to the space
      |  
      |  checkInit(this)
@@ -189,8 +195,17 @@ CLASSES
      |  closeCamApp()
      |      Stop capturing and destroy cv2 windows
      |  
+     |  defaultKeyManagement(k, cam)
+     |      # Default key management method
+     |  
      |  getFrames()
      |      Get frames from all camera
+     |  
+     |  keyEvents(*args)
+     |      # Celui qui fait tout
+     |  
+     |  keyManagement = defaultKeyManagement(k, cam)
+     |      # Default key management method
      |  
      |  releaseAll()
      |      Stop evrything
@@ -257,6 +272,7 @@ CLASSES
      |  props = {'exposure': 15, 'fps': 5, 'height': 4, 'width': 3}
     
     class Space(__builtin__.object)
+     |  # RIP
      |  # Gestion du repère, en mesure d'angles relatifs
      |  
      |  Methods defined here:
