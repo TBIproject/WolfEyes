@@ -68,6 +68,8 @@ FUNCTIONS
     
     crash(img, ksize=(5, 5), sigmaX=2, *args)
     
+    getScreenSize()
+    
     grounder(img, dtype=None)
         Tries to remove absolute offset
         'img' must be a 3 colors image

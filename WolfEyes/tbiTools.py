@@ -299,6 +299,8 @@ class Statos:
 # Create fullscreen window with canvas
 def FullscreenCanvas(*args, **kargs):
 	root = Tk.Tk()
+	
+	root.bind('<q>', lambda e: root.withdraw())
 
 	# make it cover the entire screen
 	w, h = root.winfo_screenwidth(), root.winfo_screenheight()
@@ -314,4 +316,14 @@ def FullscreenCanvas(*args, **kargs):
 		canvas=canvas,
 		window=root
 	)
+###
+
+def getScreenSize():
+	r = Tk.Tk()
+	p = pyon(
+		height=r.winfo_screenheight(),
+		width=r.winfo_screenwidth()
+	)
+	r.destroy()
+	return p
 ###

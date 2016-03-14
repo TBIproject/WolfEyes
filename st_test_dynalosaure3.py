@@ -11,7 +11,7 @@ cam1.PYON.gamma = 0.5
 cam1.PYON.deriv_thresh = 20
 cam1.init(0, width=W, height=H)
 cam1.setFOV(horizontal=math.radians(92.0))
-cam1.setImageVertBand(0.43, 0.50)
+cam1.setImageVertBand(0.45, 0.53)
 cam1.autoExposure()
 cam1.setReferenceSP()
 
@@ -21,7 +21,7 @@ cam2.PYON.gamma = 0.5
 cam2.PYON.deriv_thresh = 20
 cam2.init(1, width=W, height=H)
 cam2.setFOV(horizontal=math.radians(92.0))
-cam2.setImageVertBand(0.43, 0.50)
+cam2.setImageVertBand(0.45, 0.53)
 cam2.autoExposure()
 cam2.setReferenceSP()
 

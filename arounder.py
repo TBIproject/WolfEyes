@@ -55,7 +55,7 @@ while 1:
 	
 	# Affichage
 	cv2.imshow('source', cam.frame)
-	cv2.imshow('copmlexe', cam.stream)
+	cv2.imshow('complexe', cam.stream)
 	cv2.imshow('reference', cam.reference)
 	for name, img in r.iteritems(): cv2.imshow(name, img)
 	

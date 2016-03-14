@@ -74,7 +74,8 @@ class Camera(object):
 			cam.setReference(count=10)
 			
 		elif k == 'c':
-			cam.calibrate(True)
+			size = getScreenSize()
+			cam.calibrate(True, w=size.width, h=size.height)
 			
 		elif k == '.':
 			cam.Export('cam')
@@ -92,8 +93,10 @@ class Camera(object):
 		k = Camera.waitKey(*args)
 		if k < 255:
 			for cam in Camera.CAMERAS:
-				if Camera.keyManagement(chr(k), cam):
-					return True
+				try:
+					if Camera.keyManagement(chr(k), cam):
+						return True
+				except Exception as e: print e
 		return False
 	###
 	
@@ -865,7 +868,7 @@ class Camera(object):
 		
 		# Petit seuillage des familles
 		this._BINARY = delta = EmptyFrom(diff, 1)
-		delta[:,:] = ((diff[:,:,2] + diff[:,:,1] + diff[:,:,0]) > seuil) * 255
+		delta[:,:] = (diff.sum(axis=2) > seuil) * 255
 		
 		return pyon(
 			AbsDiff = diff,
