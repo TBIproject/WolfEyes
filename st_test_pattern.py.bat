@@ -1,0 +1,2 @@
+st_test_pattern.py
+pause

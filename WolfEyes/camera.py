@@ -444,12 +444,9 @@ class Camera(object):
 		count = kargs.get('count', 10)
 		
 		this.setReference(count=count)
-		ref_deriv = cf.Scharr(this.reference)
-		ref_deriv = cf.Gamma(ref_deriv, this.PYON.gamma)
-		ref_deriv_mask = ((ref_deriv > this.PYON.deriv_thresh) * 255).astype(np.uint8)
-		this.ref_deriv = ref_deriv & ref_deriv_mask
-		this.ref_deriv = cv2.erode(this.ref_deriv, (9, 9))
-		this.ref_deriv = cv2.dilate(this.ref_deriv, (9, 9))
+		ref_deriv = cf.Scharr(this.reference).max(axis=2)
+		ref_deriv = cv2.bilateralFilter(ref_deriv, 15, 10, 25)
+		this.ref_deriv = cf.Gamma(ref_deriv, this.PYON.gamma)
 		
 	# def st(this, cam, **kargs):
 	
@@ -481,12 +478,9 @@ class Camera(object):
 	def st(this, cam, **kargs):	
 		cam.getFrame()
 		corrected_frame = cam.reference.copy()
-		deriv = cf.Scharr(cam.frame)
+		deriv = cf.Scharr(cam.frame).max(axis=2)
+		deriv = cv2.bilateralFilter(deriv, 15, 10, 25)
 		deriv = cf.Gamma(deriv, cam.PYON.gamma)
-		deriv_mask = ((deriv > cam.PYON.deriv_thresh) * 255).astype(np.uint8)
-		deriv = deriv & deriv_mask
-		deriv = cv2.erode(deriv, (9, 9))
-		deriv = cv2.dilate(deriv, (9, 9))
 		
 		for y in xrange(0, deriv.shape[0], cam.PYON.blockSize.height):
 			for x in xrange(0, deriv.shape[1], cam.PYON.blockSize.width):
@@ -556,10 +550,10 @@ class Camera(object):
 				cumul += current
 			
 			else: # Première itération
-				cumul = current.astype(int)
+				cumul = current.astype(np.float64)
 				
 			# Calcul de l'image moyenne actuelle
-			result = (cumul / (i+1)).astype(np.uint8)
+			result = (cumul / (i+1)).astype(current.dtype)
 		###
 		
 		this.resetBin()
@@ -650,10 +644,11 @@ class Camera(object):
 		# Arguments
 		cams = kargs.get('cams', Camera.CAMERAS)
 		func = kargs.get('func', lambda cam: None)
+		args = kargs.get('args', tuple())
 		
 		threads = []
 		for cam in cams:
-			thread = Thread(target=func, args=(cam,))
+			thread = Thread(target=func, args=(cam,) + args)
 			threads.append(thread)
 			thread.start()
 			
@@ -1140,6 +1135,7 @@ class Camera(object):
 	# Algorithme de détection de countours
 	def arounder(this, **kargs):
 		"""Function making use of OpenCV's contours.
+		 - quiet: Do not print stuff
 		 - maxCount: Maximum number of contours to process
 		 - minArea: Minimum area to look for
 		 - maxArea: Maximum area to look for
@@ -1149,6 +1145,7 @@ class Camera(object):
 		"""
 		
 		# Arguments
+		quiet = kargs.get('quiet', False)
 		maxCount = kargs.get('maxCount', 200)
 		maxArea = kargs.get('maxArea', 10000000)
 		minArea = kargs.get('minArea', 0)
@@ -1206,7 +1203,7 @@ class Camera(object):
 		scan[:,:,0] = scan[:,:,1] = scan[:,:,2] = bin
 		
 		# Visuel
-		printf('%d/%d%60s\r' % (len(objects), count, ''))
+		if not quiet: printf('%d/%d%60s\r' % (len(objects), count, ''))
 		cv2.drawContours(scan, ignored, -1, ignore, 1)
 		cv2.drawContours(scan, objects, -1, color, thick)
 		

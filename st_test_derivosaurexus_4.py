@@ -9,19 +9,19 @@ blockSize = pyon(
 	height = 5,
 )
 
-spread = 10
+spread = 20
 
 # Création de la caméra
 cam = Camera()
 cam.init(0, width=W, height=H)
 cam.autoExposure()
 cam.setFOV(horizontal=math.radians(92.0))
-cam.setImageVertBand(0.42, 0.50)
+cam.setImageVertBand(0.40, 0.50)
 
 cam.setReference(count=10)
 
 ref_deriv = cf.Scharr(cam.reference).max(axis=2)
-ref_deriv = cv2.fastNlMeansDenoising(ref_deriv, searchWindowSize = 15, h = 5)
+ref_deriv = cv2.bilateralFilter(ref_deriv, 25, 10, 25)
 ref_deriv = cf.Gamma(ref_deriv, 0.25)
 
 print 'looping...'
@@ -30,7 +30,7 @@ while 1:
 	cam.getFrame()
 	corrected_frame = cam.reference.copy()
 	deriv = cf.Scharr(cam.frame).max(axis=2)
-	deriv = cv2.bilateralFilter(deriv, 25, 25, 25)
+	deriv = cv2.bilateralFilter(deriv, 25, 10, 25)
 	deriv = cf.Gamma(deriv, 0.25)
 	
 	for y in xrange(0, deriv.shape[0], blockSize.height):
@@ -40,7 +40,7 @@ while 1:
 			
 			deriv_diff = abs(int(ref_deriv_part.sum()) - int(deriv_part.sum())) / float(blockSize.width * blockSize.height * 3 * 255)
 			
-			if deriv_diff >= 0.05:
+			if deriv_diff >= 0.035:
 				corrected_frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread] = cam.frame[y-spread:y+blockSize.height+spread, x-spread:x+blockSize.width+spread]
 
 	

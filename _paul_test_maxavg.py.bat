@@ -1,0 +1,2 @@
+_paul_test_maxavg.py
+pause
