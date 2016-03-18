@@ -21,16 +21,13 @@ while 1:
 	cam.getFrame()
 	
 	# Isolement
-	r = cam.detectByRefAdv(
-		seuil=60,
-		coef=-1
-	)
+	r = cam.detectByRefAdv()
 	
 	# Amélioration:
 	# cam.fgMagic()
 	
 	# Test du anoise
-	cam.anoise(150, 150)
+	cam.anoise(50)
 	
 	# Détection
 	cam.arounder(
@@ -57,7 +54,7 @@ while 1:
 	cv2.imshow('source', cam.frame)
 	cv2.imshow('complexe', cam.stream)
 	cv2.imshow('reference', cam.reference)
-	for name, img in r.iteritems(): cv2.imshow(name, img)
+	# for name, img in r.iteritems(): cv2.imshow(name, img)
 	
 	# Input management
 	sKey = Camera.waitKey()

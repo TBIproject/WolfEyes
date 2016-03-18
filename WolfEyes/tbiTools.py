@@ -27,6 +27,10 @@ def channels(img):
 	shape = np.shape(img)
 	return shape[2] if len(shape) > 2 else 1
 
+def extend_GRAY2BGR(img):
+	"""Generates a 3 channel image based on a gray image"""
+	return np.repeat(img[:, :, np.newaxis], 3, axis=2)
+
 # Constrain
 def constrain(n, min, max): return min if n < min else max if n > max else n
 def Constrain(min, max, *args):

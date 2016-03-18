@@ -444,9 +444,11 @@ class Camera(object):
 		count = kargs.get('count', 10)
 		
 		this.setReference(count=count)
-		ref_deriv = cf.Scharr(this.reference).max(axis=2)
+		ref_deriv = cv2.bilateralFilter(this.reference, 15, 10, 25)
+		ref_deriv = cv2.medianBlur(ref_deriv, 5)
+		ref_deriv = cf.Scharr(ref_deriv).astype(np.float32).sum(axis=2)
 		ref_deriv = cv2.bilateralFilter(ref_deriv, 15, 10, 25)
-		this.ref_deriv = cf.Gamma(ref_deriv, this.PYON.gamma)
+		this.ref_deriv = cf.Gamma(ref_deriv, this.PYON.gamma, np.float32)
 		
 	# def st(this, cam, **kargs):
 	
@@ -478,16 +480,18 @@ class Camera(object):
 	def st(this, cam, **kargs):	
 		cam.getFrame()
 		corrected_frame = cam.reference.copy()
-		deriv = cf.Scharr(cam.frame).max(axis=2)
+		deriv = cv2.bilateralFilter(cam.frame, 15, 10, 25)
+		deriv = cv2.medianBlur(deriv, 5)
+		deriv = cf.Scharr(cv2.cvtColor(deriv, cv2.COLOR_BGR2Lab)).astype(np.float32).sum(axis=2)
 		deriv = cv2.bilateralFilter(deriv, 15, 10, 25)
-		deriv = cf.Gamma(deriv, cam.PYON.gamma)
+		deriv = cf.Gamma(deriv, cam.PYON.gamma, np.float32)
 		
 		for y in xrange(0, deriv.shape[0], cam.PYON.blockSize.height):
 			for x in xrange(0, deriv.shape[1], cam.PYON.blockSize.width):
 				ref_deriv_part = cam.ref_deriv[y:y+cam.PYON.blockSize.height, x:x+cam.PYON.blockSize.width]
 				deriv_part = deriv[y:y+cam.PYON.blockSize.height, x:x+cam.PYON.blockSize.width]
 				
-				deriv_diff = abs(int(ref_deriv_part.sum()) - int(deriv_part.sum())) / float(cam.PYON.blockSize.width * cam.PYON.blockSize.height * 3 * 255)
+				deriv_diff = abs(ref_deriv_part.sum() - deriv_part.sum()) / float(cam.PYON.blockSize.width * cam.PYON.blockSize.height * 3 * 255)
 				
 				if deriv_diff >= cam.PYON.deriv_diff_thresh:
 					corrected_frame[y-cam.PYON.spread:y+cam.PYON.blockSize.height+cam.PYON.spread, x-cam.PYON.spread:x+cam.PYON.blockSize.width+cam.PYON.spread] = cam.frame[y-cam.PYON.spread:y+cam.PYON.blockSize.height+cam.PYON.spread, x-cam.PYON.spread:x+cam.PYON.blockSize.width+cam.PYON.spread]
@@ -567,8 +571,8 @@ class Camera(object):
 		
 		# Arguments
 		frames = kargs.get('frames', 4)
-		start = kargs.get('start', -10)
-		end = kargs.get('start', -3)
+		start = kargs.get('start', -6)
+		end = kargs.get('end', -3)
 		
 		max = 0
 		v = start
@@ -876,10 +880,10 @@ class Camera(object):
 		"""
 		
 		# Arguments
-		seuil = kargs.get('seuil', 100)
-		ref = kargs.get('ref', this._REF)
 		frame = kargs.get('frame', this._FRAME)
-		coef = kargs.get('coef', 1)
+		ref = kargs.get('ref', this._REF)
+		seuil = kargs.get('seuil', None)
+		coef = kargs.get('coef', 0)
 		
 		# On fait la différence et on extrait les composantes RGB
 		diff = cv2.absdiff(frame, ref)
@@ -890,16 +894,21 @@ class Camera(object):
 		sat[:,:,0] *= weight
 		sat[:,:,1] *= weight
 		sat[:,:,2] *= weight
+		sum = sat.sum(axis=2)
+		MEAN = sum.mean()
+		MAX = sum.max()
 		
 		# Petit seuillage des familles
 		this._BINARY = delta = EmptyFrom(sat, 1)
-		delta[:,:] = ((sat[:,:,2] + sat[:,:,1] + sat[:,:,0]) > seuil) * 255
+		seuil = seuil if seuil else 0.1 * (MAX - MEAN) + MEAN
+		delta[:,:] = (sum > seuil) * 255
 		
 		return pyon(
 			AbsDiff = diff,
 			Weight = weight % 1,
 			Weighted = sat,
-			Threshold = delta
+			Threshold = delta,
+			ThreshValue = seuil
 		)
 		
 	# Traitement de l'image

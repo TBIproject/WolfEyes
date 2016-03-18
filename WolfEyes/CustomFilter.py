@@ -25,7 +25,7 @@ ScharrY = np.array([
 # Custom pseudo-derivation method
 def Deriv(img, dt=1, **kargs):
 	# Images
-	x = y = img.astype(np.float32)
+	x = y = img.astype(np.float64)
 	kx = kargs.get('kx', ScharrX)
 	ky = kargs.get('ky', ScharrY)
 	
@@ -44,12 +44,12 @@ def Deriv(img, dt=1, **kargs):
 ###
 
 def Scharr(img, dt=1):
-	result = np.zeros(img.shape, np.int16)
+	result = np.zeros(img.shape, np.float64)
 	
 	d = Deriv(img, dt)
 	
 	result = (np.abs(d.dx) + np.abs(d.dy)) / 2.0
-	return result.astype(np.uint8)
+	return result.astype(np.float64)
 ###
 
 def Laplacian(img):
@@ -96,10 +96,10 @@ def dtReconstruct(img, k=None, d=0):
 	return reconstruct
 ###"""
 
-def Gamma(img, gamma=1):
-	return (((img / 255.0) ** gamma) * 255).astype(np.uint8)
+def Gamma(img, gamma=1, dtype=np.uint8):
+	return (((img / 255.0) ** gamma) * 255).astype(dtype)
 ###
 
-def Gamma2(img, gamma=1):
-	return ((img ** gamma) / (255.0 ** (gamma - 1))).astype(np.uint8)
+def Gamma2(img, gamma=1, dtype=np.uint8):
+	return ((img ** gamma) / (255.0 ** (gamma - 1))).astype(dtype)
 ###
