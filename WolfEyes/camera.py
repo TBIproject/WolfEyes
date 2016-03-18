@@ -547,7 +547,7 @@ class Camera(object):
 				if check:
 					# Détection d'un changement
 					this.detectByRef(seuil=refSeuil, ref=result, frame=current)
-					sum = this.binary.sum()/255
+					sum = this.binary.sum()/255.0
 					if sum > sumSeuil: # Crash
 						raise Exception("Don't interfere with the reference ! (%d)" % sum)
 				# END CHECK
@@ -556,10 +556,10 @@ class Camera(object):
 				cumul += current
 			
 			else: # Première itération
-				cumul = current.astype(int)
+				cumul = current.astype(np.float64)
 				
 			# Calcul de l'image moyenne actuelle
-			result = (cumul / (i+1)).astype(np.uint8)
+			result = (cumul / (i+1)).astype(current.dtype)
 		###
 		
 		this.resetBin()
@@ -650,10 +650,11 @@ class Camera(object):
 		# Arguments
 		cams = kargs.get('cams', Camera.CAMERAS)
 		func = kargs.get('func', lambda cam: None)
+		args = kargs.get('args', tuple())
 		
 		threads = []
 		for cam in cams:
-			thread = Thread(target=func, args=(cam,))
+			thread = Thread(target=func, args=(cam,) + args)
 			threads.append(thread)
 			thread.start()
 			

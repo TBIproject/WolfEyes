@@ -4,7 +4,7 @@ NAME
     camera
 
 FILE
-    b:\popolopo\__git (work)\wolfeyespython\wolfeyes\camera.py
+    c:\users\white_knight02\..projet\wolfeyespython\wolfeyes\camera.py
 
 DESCRIPTION
     AUTHOR(S): POPOLO, 
