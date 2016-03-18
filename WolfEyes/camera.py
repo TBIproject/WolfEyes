@@ -545,7 +545,7 @@ class Camera(object):
 				if check:
 					# Détection d'un changement
 					this.detectByRef(seuil=refSeuil, ref=result, frame=current)
-					sum = this.binary.sum()/255
+					sum = this.binary.sum()/255.0
 					if sum > sumSeuil: # Crash
 						raise Exception("Don't interfere with the reference ! (%d)" % sum)
 				# END CHECK

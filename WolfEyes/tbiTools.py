@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 import sys
 
+tiny_float32 = np.nextafter(np.float32(0.), np.float32(1.))
+
 # PRINTF!!
 def printf(txt):
 	"""No line feed at the end ! :D"""
@@ -57,6 +59,12 @@ def EmptyFrom(img, chan=None):
 	"""Creates an empty image from another (same size, uint8)"""
 	if not chan: chan = channels(img)
 	return Empty(height=height(img), width=width(img), channels=chan)
+
+# Return the same image on a 3 channels image
+def extend_GRAY2RGB(img):
+	"""When you've got a grayscale image and you wish you could
+	convert it to RGB without weird weighted weirdo numbers"""
+	return np.repeat(img[:, :, np.newaxis], 3, axis=2)
 	
 # Retourne la liste des maximums d'un contour
 def limiter(contour, maxDist=0):

@@ -13,8 +13,14 @@ cam.setImageVertBand(0, 0.5)
 cam.setAnoisek(radius=3)
 cam.autoExposure()
 
+def image_process(frame):
+	frame = cv2.bilateralFilter(frame, *biblur_params).astype(np.float32)
+	frame -= extend_GRAY2RGB(frame.mean(axis=2, dtype=np.float32))
+	frame /= 255.0
+	return frame
+### END PROCESS
 biblur_params = (11, 50, 50)
-cam.onFrameGet = lambda frame: cv2.bilateralFilter(frame, *biblur_params)
+cam.onFrameGet = image_process
 
 print 'looping...'
 cam.setReference(count=10)
@@ -22,16 +28,11 @@ while 1:
 	# On filme
 	cam.getFrame()
 	
-	# bi = cv2.bilateralFilter(cam.frame, *biblur_params)
-	# bi = cv2.bilateralFilter(bi, 11, 50, 50)
-	
-	# p = cam.detectByRef(seuil=50)
-	absdiff = cv2.absdiff(cam.reference, cam.frame)
-	diff = cv2.cvtColor(absdiff, cv2.COLOR_BGR2GRAY)
-	S, thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-	
-	print S
-	if S > 10: cam._BINARY = thresh
+	pixel_ratio = cam.reference / (cam.frame+1)
+	pixel_rmean = pixel_ratio.mean()
+	print pixel_rmean
+	ref = cam.reference * pixel_rmean
+	absdiff = cv2.absdiff(ref, cam.frame)
 	
 	cam.anoise(30)
 	cam.arounder(
@@ -43,10 +44,9 @@ while 1:
 	
 	# Affichage
 	# cv2.imshow('reference', cam.reference)
-	cv2.imshow('complexe', cam.stream)
+	# cv2.imshow('complexe', cam.stream)
 	# cv2.imshow('source', cam.frame)
-	cv2.imshow('thresh', thresh)
-	cv2.imshow('diff', diff)
+	cv2.imshow('absdiff', absdiff)
 	
 	# Input management
 	if Camera.keyEvents(): break

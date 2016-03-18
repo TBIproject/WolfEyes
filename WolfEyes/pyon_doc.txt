@@ -4,7 +4,7 @@ NAME
     pyon - Flexible json-like dict
 
 FILE
-    b:\popolopo\__git (work)\wolfeyespython\wolfeyes\pyon.py
+    c:\users\white_knight02\..projet\wolfeyespython\wolfeyes\pyon.py
 
 CLASSES
     __builtin__.dict(__builtin__.object)
