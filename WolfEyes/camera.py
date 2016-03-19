@@ -260,12 +260,14 @@ class Camera(object):
 		this._BINARY = EmptyFrom(this._FRAME, 1)
 		
 	# Affichage "complexe"
-	@property
+	@property 
 	def stream(this):
 		"""Displays the scan and the current frame"""
 		scan = this._SCAN
 		frame = this._FRAME
-		return np.bitwise_or(np.bitwise_and((np.logical_not(scan) * 255).astype(np.uint8), frame), scan)
+		Bscan = (scan > 0).astype(np.uint8) * 255
+		BscanINV = np.logical_not(scan).astype(np.uint8) * 255
+		return (frame & BscanINV) + (scan & Bscan)
 		
 	# ------------------------------------------------------- # ------------------------------------------------------- #
 	
@@ -1046,12 +1048,155 @@ class Camera(object):
 		if anoisek is None: return None
 		
 		# More magic
-		bin = this._BINARY
+		bin = this._BINARY	
 		for thresh in args:
 			bin[:,:] = (cv2.filter2D(bin, -1, anoisek) / 2.55 > thresh) * 255
 		return True
 	
+	# Gruge de l'espace
+	def spotDetector(this, **kargs):
+		""" Hmm """
+		
+		thresh = kargs.get('thresh', 230)
+		
+		level = this.frame.sum(axis=2, dtype=np.float32) / 3
+		thresh = cv2.threshold(level, thresh, 1, cv2.THRESH_BINARY)[1]
+		this._BINARY = (thresh == 1).astype(np.uint8) * 255
+		return pyon(
+			thresh = thresh,
+			binary = this._BINARY
+		)
+	
 	# ------------------------------------------------------- # ------------------------------------------------------- #
+	
+	# Gruge++
+	def spotLocalizator(this, **kargs):
+		""" Hmmm """
+		
+		# Arguments
+		quiet = kargs.get('quiet', False)
+		bigger = kargs.get('bigger', True)
+		circleRatio = kargs.get('circleRatio', 0.5)
+		maxCount = kargs.get('maxCount', 10)
+		maxArea = kargs.get('maxArea', 10000000)
+		minArea = kargs.get('minArea', 0)
+		ignore = kargs.get('ignore', (0, 255, 0))
+		color = kargs.get('color', (0, 0, 255))
+		thick = kargs.get('thick', 1)
+		
+		# Image binaire issue de la détection
+		bin = this._BINARY.copy()
+		input = bin.copy()
+		
+		# Modifie l'image de départ T__T
+		image, contours, hierarchy = cv2.findContours(
+			input,
+			cv2.RETR_LIST,
+			cv2.CHAIN_APPROX_SIMPLE
+		)
+		
+		# Comptation
+		spots = [] # Liste des spots
+		finger = None # Doigt trouvé
+		count = len(contours) # Nombre de contours
+		objects, ignored = [], [] # Liste des contours
+		bigger = 0 if bigger else None # Plus gros spot
+		if count < maxCount:
+			
+			# Filtrage et localisation:
+			for contour in contours:
+				
+				# Filtrage des contours selon l'aire
+				area = cv2.contourArea(contour)
+				if minArea <= area and area <= maxArea:
+					
+					# Calcul de la position
+					obj = cv2.convexHull(contour)
+					
+					# Création d'un cercle
+					(x, y), radius = cv2.minEnclosingCircle(obj)
+						
+					# Test du cercle
+					circleArea = math.pi * radius**2
+					objArea = cv2.contourArea(obj)
+					if objArea/circleArea < circleRatio:
+						ignored.append(contour)
+						continue # Bye
+					
+					point = D2Point(x, y)
+				
+					# Est-ce le point le plus bas / gros ?
+					if finger:
+						
+						if bigger is not None:
+							if radius > bigger:
+								bigger = radius
+								finger = point
+							elif radius == bigger:
+								if finger.y < point.y: finger = point
+						
+						elif finger.y < point.y: finger = point
+						
+					else:
+						if bigger is not None: bigger = radius
+						finger = point
+					
+					circle = pyon(
+						r = int(radius),
+						x = int(x),
+						y = int(y)
+					)
+					
+					# Enregistrement
+					spots.append(circle)
+					objects.append(obj)
+				
+				### END IF
+				
+				# Sinon on l'ignore
+				else: ignored.append(contour)
+				
+			### END FOR
+		
+		### END IF
+		else: ignored = contours
+		
+		# On duplique l'image pour le rendu final
+		this._SCAN = scan = EmptyFrom(bin, 3)
+		scan[:,:,0] = scan[:,:,1] = scan[:,:,2] = bin
+		
+		# Visuel
+		if not quiet: printf('%d/%d%60s\r' % (len(objects), count, ''))
+		cv2.drawContours(scan, ignored, -1, ignore, 1)
+		cv2.drawContours(scan, objects, -1, color, thick)
+		for c in spots:
+			cv2.circle(scan, (c.x, c.y), c.r, color, thick)
+		
+		# Si on a trouvé
+		if finger:
+			
+			# Affichage viseur
+			scan[:, finger.x, :] = [255, 0, 0]
+			scan[finger.y, :, :] = [127, 0, 0]
+			
+			# Calcul de la taille de l'image
+			size = D2Point(width(bin), height(bin))
+			
+			# Reformatage
+			origin = +finger
+			finger /= size-1
+			finger.x = 1 - finger.x
+			this._BOTTOM = (origin-2).y == (size-4).y
+		
+		# Sinon on arrête de cliquer
+		else: this._BOTTOM = False
+		
+		# On enregistre le truc
+		this._DETECTED = finger
+		
+		return pyon(
+			contours = scan
+		)
 	
 	# Pour localiser le doigt sur une image binaire (noir/blanc)
 	# Skywalker: On compte le nombre de pixels sur une ligne en
