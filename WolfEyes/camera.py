@@ -525,7 +525,6 @@ class Camera(object):
 		sumSeuil = kargs.get('sumSeuil', 200)
 		refSeuil = kargs.get('refSeuil', 150)
 		interval = kargs.get('interval', 0)
-		check = kargs.get('check', False)
 		count = kargs.get('count', 1)
 		
 		# Image cumulative
@@ -543,17 +542,7 @@ class Camera(object):
 			current = this._FRAME
 			
 			if i: # Si ce n'est plus la première itération
-				
-				if check:
-					# Détection d'un changement
-					this.detectByRef(seuil=refSeuil, ref=result, frame=current)
-					sum = this.binary.sum()/255.0
-					if sum > sumSeuil: # Crash
-						raise Exception("Don't interfere with the reference ! (%d)" % sum)
-				# END CHECK
-				
-				# Cumulation
-				cumul += current
+				cumul += current # Cumulation
 			
 			else: # Première itération
 				cumul = current.astype(np.float64)

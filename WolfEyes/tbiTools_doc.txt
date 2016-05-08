@@ -4,7 +4,7 @@ NAME
     tbiTools - Tools for everyday tasks
 
 FILE
-    c:\users\white_knight02\..projet\wolfeyespython\wolfeyes\tbitools.py
+    c:\users\white_knight02\documents\_git\wolfeyes\wolfeyes\tbitools.py
 
 CLASSES
     Statos
@@ -68,6 +68,13 @@ FUNCTIONS
     
     crash(img, ksize=(5, 5), sigmaX=2, *args)
     
+    extend_GRAY2BGR(img)
+        Generates a 3 channel image based on a gray image
+    
+    extend_GRAY2RGB(img)
+        When you've got a grayscale image and you wish you could
+        convert it to RGB without weird weighted weirdo numbers
+    
     getScreenSize()
     
     grounder(img, dtype=None)
@@ -99,5 +106,8 @@ FUNCTIONS
     
     width(img)
         Get an image's width
+
+DATA
+    tiny_float32 = 1.4012985e-45
 
 

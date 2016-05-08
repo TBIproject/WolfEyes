@@ -4,7 +4,7 @@ NAME
     MouseControl - Easy mouse controller
 
 FILE
-    c:\users\white_knight02\..projet\wolfeyespython\wolfeyes\mousecontrol.py
+    c:\users\white_knight02\documents\_git\wolfeyes\wolfeyes\mousecontrol.py
 
 FUNCTIONS
     click(x, y, b=1)

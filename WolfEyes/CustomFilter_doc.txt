@@ -4,15 +4,15 @@ NAME
     CustomFilter - Curstom filter library
 
 FILE
-    c:\users\white_knight02\..projet\wolfeyespython\wolfeyes\customfilter.py
+    c:\users\white_knight02\documents\_git\wolfeyes\wolfeyes\customfilter.py
 
 FUNCTIONS
     Deriv(img, dt=1, **kargs)
         # Custom pseudo-derivation method
     
-    Gamma(img, gamma=1)
+    Gamma(img, gamma=1, dtype=<type 'numpy.uint8'>)
     
-    Gamma2(img, gamma=1)
+    Gamma2(img, gamma=1, dtype=<type 'numpy.uint8'>)
     
     Laplacian(img)
     
