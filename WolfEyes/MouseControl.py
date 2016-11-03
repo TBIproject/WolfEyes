@@ -68,9 +68,9 @@ def drag(click, x, y):
         # Si on clique toujours
         if click: move(x, y)
 
-    else: # Si on arréte la glisse :O
-            DRAG = False
-            mouse_up(x, y)
+        else: # Si on arréte la glisse :O
+                DRAG = False
+                mouse_up(x, y)
 
     # Si c'est le premier clic
     else: mouse_down(x, y)

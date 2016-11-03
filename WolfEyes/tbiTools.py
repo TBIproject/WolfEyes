@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-*
 """Tools for everyday tasks"""
 from threading import Thread
-from D2Point import *
-from pyon import pyon
-import Tkinter as Tk
+from .D2Point import *
+from .pyon import pyon
+import tkinter as Tk
 import numpy as np
 import cv2
 import sys

@@ -13,7 +13,7 @@ sys.stdout = NUL
 from .. import tbiTools
 from .. import MouseControl
 from .. import CustomFilter
-from ..camera import Space, Camera
+from ..Camera import Camera
 from ..D2Point import D2Point
 from ..pyon import pyon
 
