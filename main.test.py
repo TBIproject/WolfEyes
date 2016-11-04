@@ -14,7 +14,7 @@ def test(frame):
     cam.process()
 
 @cam.addProcess
-def proc1(frame, cam):
+def proc1(frame):
     frame[::, ::3] = (0, 0, 255)
 
 # Actual loop

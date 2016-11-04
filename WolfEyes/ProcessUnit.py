@@ -30,7 +30,7 @@ class ProcessUnit(Camera):
     # Generator applying a process and yielding the current state of the image
     def processByStep(this, **kargs):
 
-        source = this._LASTFRAME_AREA if kargs.get('areaOnly', False) else this._LASTFRAME
+        source = this._LASTFRAME_AREA if kargs.get('areaOnly', True) else this._LASTFRAME
 
         if source is not None:
 
