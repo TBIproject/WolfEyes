@@ -1,15 +1,29 @@
-from WolfEyes.Camera import *
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-cam = Camera()
-cam.init(0)
+from WolfEyes.WolfEye import *
 
-print(cam.area)
+cam = ProcessUnit(id = 0)
+cam.setArea(
+    (0, .45),
+    (1., .55)
+)
 
-while 1:
-    cam.getFrame()
-    cv2.imshow('test', cam.frame)
+@cam.onFrameGet
+def test(frame):
+    cam.process()
+
+@cam.addProcess
+def proc1(frame, cam):
+    frame[::, ::3] = (0, 0, 255)
+
+# Actual loop
+for frame in cam.flow:
+
+    cv2.imshow('test', cam.processedFrame)
+    cv2.imshow('src', cam.source)
 
     key = cv2.waitKey(1) & 0xFF
-    if key == ord('q'): break
+    if chr(key).lower() == 'q': break
 
 Camera.closeCamApp()
