@@ -32,7 +32,7 @@ class Camera(object):
     # Managed cameras list
     CAMERA_SET = set()
 
-    def __init__(this, *args, **kargs):
+    def __init__(this, id = None, **kargs):
         """Constructor
         """
 
@@ -40,14 +40,14 @@ class Camera(object):
 
         this.data = pyon()
 
-        this.__ONFRAMEGET = lambda frame: frame
+        this._ONFRAMEGET = lambda frame: frame
 
-        this.__VIDCAP = None
-        this.__LASTFRAME = None
-        this.__LASTFRAME_AREA = None
-        this.__LASTCONFIG = pyon()
-        this.__FOV = D2Point()
-        this.__AREA = pyon(
+        this._VIDCAP = None
+        this._LASTFRAME = None
+        this._LASTFRAME_AREA = None
+        this._LASTCONFIG = pyon()
+        this._FOV = D2Point()
+        this._AREA = pyon(
             topleft = pyon(
                 y = 0,
                 x = 0
@@ -62,56 +62,55 @@ class Camera(object):
             )
         )
 
-        if (not kargs.get('id', False) is False):
-            this.init(0)
+        if id is not None:
+            this.initialize(id, **kargs)
 
     ### INIT
 
     @property
-    def videoCapture(this): return this.__VIDCAP
+    def videoCapture(this): return this._VIDCAP
 
     @property
-    def fov(this): return this.__FOV
+    def fov(this): return this._FOV
 
     @property
-    def area(this): return this.__AREA
+    def area(this): return this._AREA
 
     @property
-    def baseFrame(this): return this.__LASTFRAME
+    def source(this): return this._LASTFRAME
 
     @property
-    def frame(this): return this.__LASTFRAME_AREA
+    def frame(this): return this._LASTFRAME_AREA
 
     @property
-    def lastConfig(this): return this.__LASTCONFIG
+    def lastConfig(this): return this._LASTCONFIG
 
     @property
-    def baseHeight(this): return this.__LASTCONFIG.height
+    def sourceHeight(this): return this._LASTCONFIG.height
 
     @property
-    def baseWidth(this): return this.__LASTCONFIG.width
+    def sourceWidth(this): return this._LASTCONFIG.width
 
     # Init and config camera
-    def init(this, id, **kargs):
+    def initialize(this, id, **kargs):
         """Capture and camera initialisation"""
-        if this.__VIDCAP: this.release()
-        this.__VIDCAP = cv2.VideoCapture(id)
 
-        if not this.__VIDCAP.isOpened(): raise DeviceNotFoundException("Could not find device with id '%d'" % id)
+        this._LASTCONFIG.clear()
+        if this._VIDCAP: this.release()
+        this._VIDCAP = cv2.VideoCapture(id)
+
+        if not this._VIDCAP.isOpened(): raise DeviceNotFoundException("Could not find device with id '%d'" % id)
 
         # Force 'high fps' if not defined
         kargs['fps'] = kargs.get('fps', 120.)
 
         this.config(**kargs)
-        this.config(get=True)
+        this.config() # Store config data
 
         this.setArea(
-            this.__AREA.topleft.x,
-            this.__AREA.topleft.y,
-            this.__AREA.bottomright.x,
-            this.__AREA.bottomright.y,
-            this.__AREA.skip.x,
-            this.__AREA.skip.y
+            (this._AREA.topleft.x, this._AREA.topleft.y),
+            (this._AREA.bottomright.x, this._AREA.bottomright.y),
+            (this._AREA.skip.x, this._AREA.skip.y)
         )
 
     # Camera configuration
@@ -126,61 +125,76 @@ class Camera(object):
         result = pyon()
 
         # Get current config
-        if kargs.get('get', False) is True:
+        if not kargs:
             for prop in Camera.props: result[prop] = this.getProp(prop)
 
         else: # Assign each value to paired prop passed in kargs
             for param, value in kargs.items(): this.setProp(param, value)
             for param in kargs: result[param] = this.getProp(param)
 
-        this.__LASTCONFIG.update(result)
+        this._LASTCONFIG.update(result)
         return result
 
     def isInit(this):
         """Is the device capturing ?"""
-        return not not this.__VIDCAP
+        return this._VIDCAP.isOpened() if this._VIDCAP else False
 
     def checkInit(this):
         """Crash if not capturing"""
-        if not this.__VIDCAP:
+        if not this._VIDCAP:
             raise CameraNotInitializedException('Camera is not initialized')
-        elif not this.__VIDCAP.isOpened():
+        elif not this._VIDCAP.isOpened():
             raise CameraNotInitializedException("Camera is not initialized correctly, maybe device was not found")
 
-    def setArea(this, x, y, u, v, m, n):
-        """Region of interest"""
-        x, u = [(int(i * this.baseWidth) if type(i) == float else i) for i in (x, u)]
-        y, v = [(int(i * this.baseHeight) if type(i) == float else i) for i in (y, v)]
+    def setArea(this, topLeft, bottomRight, skip = (1, 1)):
+        """Region of interest
+        """
+        x, y = topLeft
+        u, v = bottomRight
+        m, n = skip
 
-        print(this.baseWidth, this.baseHeight)
+        if not (this.sourceWidth and this.sourceHeight):
+            raise CameraNotInitializedException("No camera configuration, initialize it")
 
-        this.__AREA.topleft.x = x
-        this.__AREA.topleft.y = y
-        this.__AREA.skip.x = m
+        x, u = [(int(i * this.sourceWidth) if isinstance(i, float) else i) for i in (x, u)]
+        y, v = [(int(i * this.sourceHeight) if isinstance(i, float) else i) for i in (y, v)]
 
-        this.__AREA.bottomright.x = u
-        this.__AREA.bottomright.y = v
-        this.__AREA.skip.y = n
+        this._AREA.topleft.x = x
+        this._AREA.topleft.y = y
+        this._AREA.skip.x = m
+
+        this._AREA.bottomright.x = u
+        this._AREA.bottomright.y = v
+        this._AREA.skip.y = n
 
     # Define custom image processing via decoration
-    def onFrameGet(func):
-        def processSaver(this):
-            this.__ONFRAMEGET = func
-        return processSaver
+    def onFrameGet(this, func):
+        this._ONFRAMEGET = func
+        return func
 
     def getFrame(this):
         """Get a frame from videoCapture object"""
         this.checkInit()
 
-        ret, frame = this.__VIDCAP.read()
+        ret, frame = this._VIDCAP.read()
         if ret is True:
-            this.__LASTFRAME = this.__ONFRAMEGET(frame)
-            this.__LASTFRAME_AREA = frame[
-                this.__AREA.topleft.x:this.__AREA.bottomright.x:this.__AREA.skip.x,
-                this.__AREA.topleft.y:this.__AREA.bottomright.y:this.__AREA.skip.y,
+
+            this._LASTFRAME = frame
+
+            area = frame[
+                this._AREA.topleft.y:this._AREA.bottomright.y:this._AREA.skip.y,
+                this._AREA.topleft.x:this._AREA.bottomright.x:this._AREA.skip.x,
                 :
             ]
-        return ret
+
+            this._LASTFRAME_AREA = area
+            area = this._ONFRAMEGET(area)
+            if area is not None:
+                this._LASTFRAME_AREA = area
+
+            return this._LASTFRAME_AREA
+
+        return False
 
     @property
     def flow(this, source=False):
@@ -189,18 +203,21 @@ class Camera(object):
         this.checkInit()
 
         while True:
-            this.getFrame()
-            yield this.__LASTFRAME if source else this.__LASTFRAME_AREA
+            if not this.isInit(): return
+            else: this.getFrame()
+
+            frame = this._LASTFRAME if source else this._LASTFRAME_AREA
+            yield frame
 
     def getProp(this, prop):
         """Getting camera's property"""
         this.checkInit()
-        return this.__VIDCAP.get(Camera.props.get(prop, prop))
+        return this._VIDCAP.get(Camera.props.get(prop, prop))
 
     def setProp(this, prop, value):
         """Setting camera's property"""
         this.checkInit()
-        this.__VIDCAP.set(Camera.props.get(prop, prop), value)
+        this._VIDCAP.set(Camera.props.get(prop, prop), value)
 
     def exposure(this): return this.getProp('exposure')
     def height(this): return this.getProp('height')
@@ -209,12 +226,13 @@ class Camera(object):
 
     def release(this):
         """Stop capturing"""
-        if this.__VIDCAP: this.__VIDCAP.release()
-        this.__VIDCAP = None
+        if this._VIDCAP: this._VIDCAP.release()
+        this._VIDCAP = None
 
     # Camera object destruction
     def __del__(this):
         """Destructor (del this)"""
+
         this.release()
         Camera.CAMERA_SET.remove(this)
 
@@ -237,7 +255,6 @@ class Camera(object):
     def releaseAll():
         """Stop evrything"""
         for camera in Camera.CAMERA_SET:
-            print(camera)
             camera.release()
 
     # On coupe tout
