@@ -1,1 +1,1 @@
-from .TypeChecker import *
+from . import TypeChecker
