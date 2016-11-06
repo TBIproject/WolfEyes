@@ -31,6 +31,7 @@ class ProcessUnit(Camera):
     def processByStep(this, **kargs):
 
         source = this._LASTFRAME_AREA if kargs.get('areaOnly', True) else this._LASTFRAME
+        pyon = kargs.get('pyon', False)
 
         if source is not None:
 
@@ -40,7 +41,13 @@ class ProcessUnit(Camera):
                 result = process.function(current, *process.args, **process.kargs)
                 if result is not None: current = result
                 this._PROCESSED_FRAME = current
-                yield current
+
+                if pyon:
+                    pyonReturn = process.copy()
+                    pyonReturn.update({'frame': current})
+                    yield pyonReturn
+                else:
+                    yield current
 
         else:
             # If there is no image to process, why bothering ?
