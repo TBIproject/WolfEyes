@@ -2,24 +2,36 @@
 """Flexible json-like dict"""
 import json
 
+class CustomEncoder(json.JSONEncoder):
+    def default(this, obj):
+        try:
+            return json.JSONEncoder.default(this, obj)
+        except: pass
+### CUSTOM ENCODER
+
 class pyon(dict):
     """This class mimics the way JSON works in Javascript
     (almost)"""
 
-    def __init__(this, init=None, unknown=None, *args, **kargs):
-        """Dict derivation
-        init: Initial data (str or dict)
-        unknown: Unknown value to use
-        """
-        dict.__init__(this, *args, **kargs)
-        this.setUnknown(unknown)
-        if init: this.load(init)
+    def __init__(this, init=None, *args, **kargs):
+        """Dict derivation"""
+        super().__init__(this, *args, **kargs)
+        if init is not None: this.load(init)
+        this.setUnknown(None)
 
     def setUnknown(this, value):
         this.__dict__['__pyon_unknown'] = value;
+        return this
 
     def getUnknown(this):
         return this.__dict__['__pyon_unknown']
+
+    # Easy storage of functions into pyon object
+    def registerDecorator(this, key):
+        def decorator(func):
+            this[key] = func
+            return func
+        return decorator
 
     def __getattr__(this, attr):
         """When: this.attr
@@ -42,7 +54,7 @@ class pyon(dict):
         """
         return this.getUnknown()
 
-    def __str__(this): return json.dumps(this)
+    def __str__(this): return json.dumps(this, cls=CustomEncoder)
     def __repr__(this): return str(this)
 
     def copy(this):
@@ -78,7 +90,7 @@ class pyon(dict):
             else:
                 raise Exception("mode is not in ['w', 'a']")
 
-            json.dump(write, f)
+            json.dump(write, f, cls=CustomEncoder)
 
     def loadFile(this, filename, mode='r'):
         """Mode list:
