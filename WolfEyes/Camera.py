@@ -9,8 +9,7 @@ This file describe the Camera object, useful for acquiring image feed from a web
 import cv2
 import numpy as np
 
-from .pyon import pyon
-from .D2Point import D2Point
+from .Utils import D2Point, pyon
 
 # Exception types
 class CameraNotInitializedException(Exception): pass
