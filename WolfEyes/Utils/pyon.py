@@ -6,7 +6,8 @@ class CustomEncoder(json.JSONEncoder):
     def default(this, obj):
         try:
             return json.JSONEncoder.default(this, obj)
-        except: pass
+        except:
+            return str(obj)
 ### CUSTOM ENCODER
 
 class pyon(dict):
