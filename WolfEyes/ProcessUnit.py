@@ -46,6 +46,8 @@ class ProcessUnit(Camera):
 
             # We don't want to mess up the original image
             current = source.copy()
+            this._PROCESSED_FRAME = source
+
             for process in this._PROCESS_STACK:
                 result = process.function(current, *process.args, **process.kargs)
                 if result is not None: current = result
