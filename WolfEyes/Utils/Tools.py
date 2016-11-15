@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 import sys
 
+from . import Filters
 from .D2Point import *
 from .pyon import *
 
@@ -131,7 +132,7 @@ def anoisek(r=5, debug=False):
 ###
 
 # Retourne l'histogramme de l'image
-def imhist(img, i=0):
+def hist(img, i=0):
     return cv2.calcHist([img], [i], None, [256], [0, 256])[:,0]
 ###
 
@@ -146,7 +147,7 @@ def imEntropy(img):
 
     result = 0.0
     for i in range(3):
-        chist = imhist(img, i)
+        chist = hist(img, i)
         e = 0.0
         for j in range(len(chist)):
             p = chist[j] / sum
@@ -160,7 +161,7 @@ def imEntropy2(img):
 
     result = 0.0
     for i in range(3):
-        chist = imhist(img, i)
+        chist = hist(img, i)
 
         p = chist / sum
         e = (p * np.log2(p)).sum()
@@ -171,26 +172,24 @@ def imEntropy2(img):
 ###
 
 # Création d'une image à partir d'un histogramme
-def histogram(img, gamma=0.3):
+def imhist(img, gamma=0.3):
     """Creates an image's histogram to display"""
 
     shape = img.shape
-    cans = shape[2] if len(shape) > 2 else 1
-    result = np.zeros((256, 256, cans), np.uint8)
-    max = height(img) * width(img)
+    channels = shape[2] if len(shape) > 2 else 1
+    result = np.zeros((256, 256, channels), np.uint8)
 
     # Si l'image possède plusieurs cannaux
-    for i in range(cans):
+    for i in range(channels):
 
         # On calcule
-        hist = imhist(img)
-        values = (255 * (hist / max)**gamma).astype(np.uint8)
+        h = hist(img, i)
+        values = Filters.Gamma(h, gamma)
 
         # On affiche
         for j in range(len(values)):
             result[:values[j], j, i] = 255
 
-    # RETURN
     return result
 
 def coloroffset(img):
