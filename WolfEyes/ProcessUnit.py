@@ -26,7 +26,7 @@ class ProcessUnit(Camera):
     def processStack(this): return this._PROCESS_STACK
 
     # Clear the process stack
-    def clearProcessStack(): del this._PROCESS_STACK[:]
+    def clearProcessStack(this): del this._PROCESS_STACK[:]
 
     # Moves processes to a certain index
     def moveProcess(this, index, *indexes):
