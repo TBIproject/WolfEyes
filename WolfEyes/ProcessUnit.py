@@ -7,6 +7,7 @@ This file describe the ProcessUnit object, which is a camera with builtin image 
 """
 
 from .Camera import *
+from .Utils import TypeChecker
 
 class ImageProcessingException(Exception): pass
 
@@ -26,6 +27,14 @@ class ProcessUnit(Camera):
 
     # Clear the process stack
     def clearProcessStack(): del this._PROCESS_STACK[:]
+
+    # Moves processes to a certain index
+    def moveProcess(this, index, *indexes):
+        stack = this._PROCESS_STACK
+
+        for i in indexes:
+            stack.insert(index, stack.pop(i))
+            index += 1
 
     # Generator applying a process and yielding the current state of the image
     def processByStep(this, **kargs):
@@ -63,18 +72,26 @@ class ProcessUnit(Camera):
         return this._PROCESSED_FRAME
 
     # Decorator for adding processes to the stack
+    @TypeChecker.args(index = int, replace = bool)
     def addProcess(this, func = None, **kargs):
+
+        index = kargs.get('index', len(this._PROCESS_STACK))
+        replace = kargs.get('replace', False)
 
         def add(func):
 
             if not callable(func):
-                raise TypeError("func should be a function, got %s instead" % type(func))
+                raise TypeError("func should be callable, got %s" % type(func))
 
-            this._PROCESS_STACK.append(pyon(
+            process = pyon(
                 function = func,
                 args = kargs.get('args', ()),
                 kargs = kargs.get('kargs', {})
-            ))
+            )
+
+            if replace:
+                this._PROCESS_STACK.pop(index)
+            this._PROCESS_STACK.insert(index, process)
 
             if kargs.get('verbose', False):
                 print('added process:', func)
