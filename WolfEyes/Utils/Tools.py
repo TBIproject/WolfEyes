@@ -73,7 +73,7 @@ def limiter(contour, maxDist=0):
     cnt = contour.copy()
     initial = start = end = None
 
-    for _ in xrange(len(cnt)):
+    for _ in range(len(cnt)):
         i = cnt[:,:,1].argmax()
         point = D2Point(cnt[i][0][0], cnt[i][0][1])
 
@@ -109,10 +109,10 @@ def anoisek(r=5, debug=False):
     kernel = np.zeros((w, h), np.float32)
 
     if debug: print
-    for u in xrange(w):
+    for u in range(w):
         x = r - u
 
-        for v in xrange(h):
+        for v in range(h):
             y = r - v
 
             dist = (x**2 + y**2) ** 0.5
@@ -137,7 +137,7 @@ def imhist(img, i=0):
 
 def histMean(hist):
     m = 0.0;
-    for i in xrange(len(hist)): m += i * hist[i]
+    for i in range(len(hist)): m += i * hist[i]
     return m / hist.sum()
 ###
 
@@ -145,10 +145,10 @@ def imEntropy(img):
     sum = img.shape[0] * img.shape[1]
 
     result = 0.0
-    for i in xrange(3):
+    for i in range(3):
         chist = imhist(img, i)
         e = 0.0
-        for j in xrange(len(chist)):
+        for j in range(len(chist)):
             p = chist[j] / sum
             e += p * (math.log(p, 2) if p else 0)
         result -= e
@@ -159,7 +159,7 @@ def imEntropy2(img):
     sum = img.shape[0] * img.shape[1]
 
     result = 0.0
-    for i in xrange(3):
+    for i in range(3):
         chist = imhist(img, i)
 
         p = chist / sum
@@ -187,7 +187,7 @@ def histogram(img, gamma=0.3):
         values = (255 * (hist / max)**gamma).astype(np.uint8)
 
         # On affiche
-        for j in xrange(len(values)):
+        for j in range(len(values)):
             result[:values[j], j, i] = 255
 
     # RETURN
@@ -197,7 +197,7 @@ def coloroffset(img):
     min = img.min(axis=2)
     off = np.zeros(img.shape, img.dtype)
     if len(off.shape) > 2:
-        for i in xrange(off.shape[2]): off[:,:,i] = min
+        for i in range(off.shape[2]): off[:,:,i] = min
     return off
 
 # Essaye de supprimer le décalage absolu
@@ -239,7 +239,7 @@ def rgbsum(img):
 
 def crash(img, ksize=(5, 5), sigmaX=2, *args):
     mean = cv2.GaussianBlur(img, ksize, sigmaX, *args)
-    print [img.min(), mean.min()]
+    print([img.min(), mean.min()])
     return (img.astype(np.int16) - mean.min()).clip(0, 255).astype(np.uint8)
 
 # Objet pour retourner des trucs
