@@ -7,7 +7,7 @@ This file describe the ProcessUnit object, which is a camera with builtin image 
 """
 
 from .Camera import *
-from .Utils import TypeChecker
+from ..Utils import TypeChecker
 
 class ImageProcessingException(Exception): pass
 

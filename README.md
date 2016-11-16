@@ -6,58 +6,44 @@ This project is meant to use two webcams and locate an object over some surface.
 
 This project also provide some libraries allowing fast and easy use of webcams, which we used to quickly craft object's extraction algorithms. Now you can use it too !
 
+- WolfEyes.Project:
+  - [Camera object doc](Markdown/Camera.md) (basic image acquisition)
+  - [ProcessUnit object doc](Markdown/ProcessUnit.md) (builtin image processing utilities)
+  - [WolfEye object doc](Markdown/WolfEye.md) (WolfEyes's specific ProcessUnit)
+
+### \Package architecture
+- **WolfEyes**
+  - Sub-Package:
+    - **Utils**
+      - Modules:
+        - **TypeChecker**: Custom made decorators for type checking (function arguments and return values)
+        - **Filters**: Module with various image processing functions.
+        - **Tools**: Module with various tools in general.
+      - Objects:
+        - **D2Point**: 2D-Vector-like object
+        - **pyon**: JSON-like object based on *dict* ([why?](Markdown/pyon.md))
+  - Objects:
+    - **Camera**: Image acquisition object
+    - **ProcessUnit**: Image processing object
+    - **WolfEyes**: Project object
+
 ### \How to use the library ?
 
-First, you should import objects from the Camera module:
+You can either import the whole package:
 
 ```python
-# Import the library
-from WolfEyes.Camera import *
+# Import everything from the whole package:
+from WolfEyes import *
 ```
 
-Then you can instanciate and use a webcam right away:
+Or you can import whatever you need precisely from the package:
 
 ```python
-# Fetch a Webcam object and initialize it
-camera = Camera(id = 0)
-```
+# Import what you want:
+from WolfEyes.Project import Camera, ProcessUnit, WolfEye
+from WolfEyes.Utils import TypeChecker, Tools, Filters, D2Point, pyon
 
-From there, you have some options in regards to how you can fetch frames from your webcam.
-
-#### First way:
-
-```python
-while True:
-
-  # Get the frame
-  frame = camera.getFrame()
-
-  # If frame is False: something went wrong
-  if frame is not False:
-    imshow('frame', frame)
-    imshow('same frame', cam.frame)
-
-  else: break
-```
-
-#### Second way:
-
-```python
-for frame in camera.flow:
-
-  # Same shit, if anything go wrong, get out !
-  if frame is not False:
-    imshow('frame', frame)
-
-  else: break
-```
-
-When you have finished with your camera(s), you can end it all:
-
-```python
-# Release every camera
-Camera.releaseAll()
-
-# Destroy all remaining cv2's imshow(...) windows
-cv2.destroyAllWindows()
+# Or just everything:
+from WolfEyes.Project import *
+from WolfEyes.Utils import *
 ```
