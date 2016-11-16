@@ -7,9 +7,9 @@ This project is meant to use two webcams and locate an object over some surface.
 This project also provide some libraries allowing fast and easy use of webcams, which we used to quickly craft object's extraction algorithms. Now you can use it too !
 
 - WolfEyes.Project:
-  - [Camera object doc](Markdown/Camera.md) (basic image acquisition)
-  - [ProcessUnit object doc](Markdown/ProcessUnit.md) (builtin image processing utilities)
-  - [WolfEye object doc](Markdown/WolfEye.md) (WolfEyes's specific ProcessUnit)
+  - [Camera object doc](WolfEyes/Markdown/Camera.md) (basic image acquisition)
+  - [ProcessUnit object doc](WolfEyes/Markdown/ProcessUnit.md) (builtin image processing utilities)
+  - [WolfEye object doc](WolfEyes/Markdown/WolfEye.md) (WolfEyes's specific ProcessUnit)
 
 ### \Package architecture
 - **WolfEyes**
