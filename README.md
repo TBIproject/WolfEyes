@@ -21,7 +21,7 @@ This project also provide some libraries allowing fast and easy use of webcams, 
         - **Tools**: Module with various tools in general.
       - Objects:
         - **D2Point**: 2D-Vector-like object
-        - **pyon**: JSON-like object based on *dict* ([why?](Markdown/pyon.md))
+        - **pyon**: JSON-like object based on *dict* ([why?](WolfEyes/Markdown/pyon.md))
   - Objects:
     - **Camera**: Image acquisition object
     - **ProcessUnit**: Image processing object
