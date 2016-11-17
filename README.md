@@ -6,26 +6,22 @@ This project is meant to use two webcams and locate an object over some surface.
 
 This project also provide some libraries allowing fast and easy use of webcams, which we used to quickly craft object's extraction algorithms. Now you can use it too !
 
-- WolfEyes.Project:
-  - [Camera object doc](WolfEyes/Markdown/Camera.md) (basic image acquisition)
-  - [ProcessUnit object doc](WolfEyes/Markdown/ProcessUnit.md) (builtin image processing utilities)
-  - [WolfEye object doc](WolfEyes/Markdown/WolfEye.md) (WolfEyes's specific ProcessUnit)
-
 ### \Package architecture
 - **WolfEyes**
-  - Sub-Package:
-    - **Utils**
-      - Modules:
-        - **TypeChecker**: Custom made decorators for type checking (function arguments and return values)
-        - **Filters**: Module with various image processing functions.
-        - **Tools**: Module with various tools in general.
+  - Sub-Packages:
+    - **[Project](WolfEyes/Project)**:
       - Objects:
-        - **D2Point**: 2D-Vector-like object
-        - **pyon**: JSON-like object based on *dict* ([why?](WolfEyes/Markdown/pyon.md))
-  - Objects:
-    - **Camera**: Image acquisition object
-    - **ProcessUnit**: Image processing object
-    - **WolfEyes**: Project object
+        - **[Camera](WolfEyes/Markdown/Camera.md)**: Basic image acquisition object
+        - **[ProcessUnit](WolfEyes/Markdown/ProcessUnit.md)**: Image processing object
+        - **[WolfEyes](WolfEyes/Markdown/WolfEyes.md)**: Project specific webcam object
+    - **[Utils](WolfEyes/Utils)**
+      - Modules:
+        - **[TypeChecker](WolfEyes/Markdown/TypeChecker.md)**: Custom made decorators for type checking
+        - **[Filters](WolfEyes/Markdown/Filters.md)**: Module with various image processing functions.
+        - **[Tools](WolfEyes/Markdown/Tools.md)**: Module with various tools in general.
+      - Objects:
+        - **[D2Point](WolfEyes/Markdown/D2Point.md)**: 2D-Vector-like object
+        - **[pyon](WolfEyes/Markdown/pyon.md)**: JSON-like object based on *dict* ([why?](WolfEyes/Markdown/pyon.md))
 
 ### \How to use the library ?
 
