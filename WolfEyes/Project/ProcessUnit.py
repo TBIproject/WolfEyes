@@ -109,6 +109,14 @@ class ProcessUnit(Camera):
         # Final result
         return this._PROCESSED_FRAME
 
+    def processFlow(this, source):
+        """for image in camera.processFlow: doThings()
+        This provide constant image stream if available"""
+        this.checkInit()
+
+        for frame in this.flow:
+            yield this.process()
+
     # Decorator for adding processes to the stack
     @TypeChecker.args(index = int, replace = bool, own = bool)
     def addProcess(this, function = None, **kargs):
