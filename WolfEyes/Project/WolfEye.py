@@ -14,6 +14,22 @@ class WolfEye(ProcessUnit):
         super().__init__(id, **kargs)
 
         this._POSITION = None
+        this._POINTS = pyon()
 
     @property
     def position(this): return this._POSITION
+
+    @property
+    def points(this): return this._POINTS
+
+    # Add a point to the point dict
+    def setPoint(this, key, value):
+        this._POINTS[key] = value
+
+    def positionFromOIJ(this, **kargs):
+
+        o = kargs.get('o', this._POINTS.o)
+        i = kargs.get('i', this._POINTS.i)
+        j = kargs.get('j', this._POINTS.j)
+
+        #o, i, j = [(int(k * this.sourceHeight) if isinstance(k, float) else k) for k in (o, i, j)]
