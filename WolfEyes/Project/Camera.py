@@ -9,7 +9,13 @@ This file describe the Camera object, useful for acquiring image feed from a web
 import cv2
 import numpy as np
 
-from ..Utils import D2Point, pyon
+from ..Utils import Vector, pyon
+
+__all__ = [
+    'Camera',
+    'CameraNotInitializedException',
+    'DeviceNotFoundException',
+    ]
 
 # Exception types
 class CameraNotInitializedException(Exception): pass
@@ -45,7 +51,7 @@ class Camera(object):
         this._LASTFRAME = None
         this._LASTFRAME_AREA = None
         this._LASTCONFIG = pyon()
-        this._FOV = D2Point()
+        this._SOURCE_FOV = Vector(2)
         this._AREA = pyon(
             topleft = pyon(
                 y = 0,
@@ -70,7 +76,7 @@ class Camera(object):
     def videoCapture(this): return this._VIDCAP
 
     @property
-    def fov(this): return this._FOV
+    def sourceFOV(this): return this._SOURCE_FOV
 
     @property
     def area(this): return this._AREA
