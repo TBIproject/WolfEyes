@@ -13,5 +13,5 @@ Well, I'm doing my best here.
   - [Filters](../Markdown/Filters.md)
   - [Tools](../Markdown/Tools.md)
 - **Objects**:
-  - [D2Point](../Markdown/D2Point.md)
+  - [Vector](../Markdown/Vector.md)
   - [pyon](../Markdown/pyon.md)
